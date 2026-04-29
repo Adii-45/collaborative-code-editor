@@ -18,7 +18,7 @@ const Room = () => {
   const { user } = useAuth();
 
   const [filesTree, setFilesTree] = useState(null); // null = loading
-  const [projectName, setProjectName] = useState('');
+  const [project, setProject] = useState(null);
   const [activeFile, setActiveFile] = useState(null);
   const [openedFiles, setOpenedFiles] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
@@ -37,7 +37,7 @@ const Room = () => {
       try {
         const { data } = await api.get(`/projects/${projectId}`);
         setFilesTree(data.fileTree);
-        setProjectName(data.name);
+        setProject(data);
         setLoadingProject(false);
       } catch (error) {
         toast.error('Failed to load project');
@@ -216,9 +216,10 @@ const Room = () => {
         toggleRun={() => setIsRunning(!isRunning)}
         toggleTerminal={() => setShowTerminal(!showTerminal)}
         showTerminal={showTerminal}
-        projectName={projectName}
+        projectName={project?.name}
         connectedUsers={connectedUsers}
         projectId={projectId}
+        project={project}
       />
       <div className="flex-1 overflow-hidden">
         <PanelGroup direction="horizontal">

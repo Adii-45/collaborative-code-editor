@@ -11,6 +11,7 @@ import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import terminalRoutes from './routes/terminalRoutes.js';
+import inviteRoutes from './routes/inviteRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 import setupSocket from './socket/index.js';
 
@@ -34,6 +35,7 @@ app.use(express.json({ limit: '10mb' })); // Increased limit for large file tree
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/terminal', terminalRoutes);
+app.use('/api/invite', inviteRoutes);
 
 // Health check
 app.get('/', (req, res) => {
