@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { FilePlus, FolderPlus, RefreshCw, ChevronRight, ChevronDown, Folder, File as FileIcon, Trash2, Edit2 } from 'lucide-react';
 import { SiJavascript, SiHtml5, SiCss, SiPython, SiCplusplus, SiJson, SiTypescript } from 'react-icons/si';
 import { DndContext, useDraggable, useDroppable, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { findNode, findParent } from '../utils/defaultFiles';
 
 const getFileIcon = (filename) => {
   if (filename.endsWith('.html')) return <SiHtml5 size={14} className="text-orange-500" />;
@@ -22,6 +23,7 @@ const FileNode = ({
   const [isRenaming, setIsRenaming] = useState(false);
   const [editName, setEditName] = useState(node.name);
   const [createName, setCreateName] = useState('');
+  const [createError, setCreateError] = useState('');
   
   const isFolder = node.type === 'folder';
 
@@ -56,22 +58,58 @@ const FileNode = ({
     }
   };
 
-  const handleCreateSubmit = (e) => {
-    if (e.key === 'Enter') {
-      if (createName.trim()) {
-        onCreateNode(node.id, createName.trim(), creatingNode.type);
-      }
+  const validateName = (name) => {
+    const trimmed = name.trim();
+    if (!trimmed) return 'Name cannot be empty';
+    if (node.children && node.children.some(c => c.name === trimmed)) return 'File already exists';
+    return '';
+  };
+
+  const submitCreate = (name) => {
+    const trimmed = name.trim();
+    if (!trimmed) {
       setCreatingNode(null);
       setCreateName('');
+      setCreateError('');
+      return false;
+    }
+    const error = validateName(name);
+    if (error) {
+      setCreateError(error);
+      return false;
+    }
+    onCreateNode(node.id, trimmed, creatingNode.type);
+    setCreatingNode(null);
+    setCreateName('');
+    setCreateError('');
+    return true;
+  };
+
+  const handleCreateKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      submitCreate(createName);
     } else if (e.key === 'Escape') {
       setCreatingNode(null);
       setCreateName('');
+      setCreateError('');
+    }
+  };
+
+  const handleCreateBlur = () => {
+    if (createName.trim()) {
+      submitCreate(createName);
+    } else {
+      setCreatingNode(null);
+      setCreateName('');
+      setCreateError('');
     }
   };
 
   const handleCreateInline = (e, type) => {
     e.stopPropagation();
     setIsOpen(true);
+    setCreateName('');
+    setCreateError('');
     setCreatingNode({ parentId: node.id, type });
   };
 
@@ -138,17 +176,23 @@ const FileNode = ({
       {isOpen && isFolder && (
         <div>
           {isCreatingHere && (
-            <div style={{ paddingLeft: `${(level + 1) * 12 + 20}px` }} className="flex items-center gap-2 py-1">
-              {creatingNode.type === 'folder' ? <Folder size={14} className="text-blue-400" /> : <FileIcon size={14} className="text-gray-400" />}
-              <input
-                autoFocus
-                value={createName}
-                onChange={e => setCreateName(e.target.value)}
-                onKeyDown={handleCreateSubmit}
-                onBlur={() => setCreatingNode(null)}
-                className="bg-[#3c3c3c] text-white px-1 outline-none border border-blue-500 w-full text-xs"
-                placeholder={`New ${creatingNode.type}...`}
-              />
+            <div style={{ paddingLeft: `${(level + 1) * 12 + 20}px` }} className="flex flex-col py-1">
+              <div className="flex items-center gap-2">
+                {creatingNode.type === 'folder' ? <Folder size={14} className="text-blue-400 shrink-0" /> : <FileIcon size={14} className="text-gray-400 shrink-0" />}
+                <input
+                  autoFocus
+                  value={createName}
+                  onChange={e => {
+                    setCreateName(e.target.value);
+                    setCreateError('');
+                  }}
+                  onKeyDown={handleCreateKeyDown}
+                  onBlur={handleCreateBlur}
+                  className={`bg-[#3c3c3c] text-white px-1 outline-none border w-full text-xs ${createError ? 'border-red-500' : 'border-blue-500'}`}
+                  placeholder={`New ${creatingNode.type}...`}
+                />
+              </div>
+              {createError && <span className="text-red-400 text-[10px] ml-6 mt-0.5">{createError}</span>}
             </div>
           )}
           {node.children && node.children.map((child) => (
@@ -173,6 +217,8 @@ const FileNode = ({
 
 const FileExplorer = ({ filesTree, activeFile, setActiveFile, openFile, onCreateNode, onDeleteNode, onRenameNode, onMoveNode }) => {
   const [creatingNode, setCreatingNode] = useState(null); // { parentId, type }
+  const [rootCreateName, setRootCreateName] = useState('');
+  const [rootCreateError, setRootCreateError] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -191,38 +237,95 @@ const FileExplorer = ({ filesTree, activeFile, setActiveFile, openFile, onCreate
     setActiveFile(id);
   };
 
+  const getTargetFolderId = () => {
+    if (!activeFile) return 'root';
+    const activeNode = findNode(filesTree, activeFile);
+    if (activeNode && activeNode.type === 'folder') return activeNode.id;
+    const parent = findParent(filesTree, activeFile);
+    return parent ? parent.id : 'root';
+  };
+
+  const handleGlobalCreate = (type) => {
+    const targetId = getTargetFolderId();
+    setCreatingNode({ parentId: targetId, type });
+    setRootCreateName('');
+    setRootCreateError('');
+  };
+
+  const validateRootName = (name) => {
+    const trimmed = name.trim();
+    if (!trimmed) return 'Name cannot be empty';
+    if (filesTree.children && filesTree.children.some(c => c.name === trimmed)) return 'File already exists';
+    return '';
+  };
+
+  const submitRootCreate = (name) => {
+    const trimmed = name.trim();
+    if (!trimmed) {
+      setCreatingNode(null);
+      setRootCreateName('');
+      setRootCreateError('');
+      return false;
+    }
+    const error = validateRootName(name);
+    if (error) {
+      setRootCreateError(error);
+      return false;
+    }
+    onCreateNode('root', trimmed, creatingNode.type);
+    setCreatingNode(null);
+    setRootCreateName('');
+    setRootCreateError('');
+    return true;
+  };
+
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div className="h-full w-full bg-[#181818] flex flex-col select-none">
         <div className="px-4 py-3 flex items-center justify-between shrink-0">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Explorer</h2>
           <div className="flex items-center gap-2 text-gray-400">
-            <button onClick={() => setCreatingNode({ parentId: 'root', type: 'file' })} className="hover:text-white" title="New File">
+            <button onClick={() => handleGlobalCreate('file')} className="hover:text-white" title="New File">
               <FilePlus size={14} />
             </button>
-            <button onClick={() => setCreatingNode({ parentId: 'root', type: 'folder' })} className="hover:text-white" title="New Folder">
+            <button onClick={() => handleGlobalCreate('folder')} className="hover:text-white" title="New Folder">
               <FolderPlus size={14} />
             </button>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto py-2 overflow-x-hidden">
           {creatingNode?.parentId === 'root' && (
-            <div className="flex items-center gap-2 py-1 px-4">
-              {creatingNode.type === 'folder' ? <Folder size={14} className="text-blue-400" /> : <FileIcon size={14} className="text-gray-400" />}
-              <input
-                autoFocus
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && e.target.value.trim()) {
-                    onCreateNode('root', e.target.value.trim(), creatingNode.type);
-                    setCreatingNode(null);
-                  } else if (e.key === 'Escape') {
-                    setCreatingNode(null);
-                  }
-                }}
-                onBlur={() => setCreatingNode(null)}
-                className="bg-[#3c3c3c] text-white px-1 outline-none border border-blue-500 w-full text-xs"
-                placeholder={`New ${creatingNode.type}...`}
-              />
+            <div className="flex flex-col py-1 px-4">
+              <div className="flex items-center gap-2">
+                {creatingNode.type === 'folder' ? <Folder size={14} className="text-blue-400 shrink-0" /> : <FileIcon size={14} className="text-gray-400 shrink-0" />}
+                <input
+                  autoFocus
+                  value={rootCreateName}
+                  onChange={e => {
+                    setRootCreateName(e.target.value);
+                    setRootCreateError('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') submitRootCreate(rootCreateName);
+                    else if (e.key === 'Escape') {
+                      setCreatingNode(null);
+                      setRootCreateName('');
+                      setRootCreateError('');
+                    }
+                  }}
+                  onBlur={() => {
+                    if (rootCreateName.trim()) submitRootCreate(rootCreateName);
+                    else {
+                      setCreatingNode(null);
+                      setRootCreateName('');
+                      setRootCreateError('');
+                    }
+                  }}
+                  className={`bg-[#3c3c3c] text-white px-1 outline-none border w-full text-xs ${rootCreateError ? 'border-red-500' : 'border-blue-500'}`}
+                  placeholder={`New ${creatingNode.type}...`}
+                />
+              </div>
+              {rootCreateError && <span className="text-red-400 text-[10px] ml-6 mt-0.5">{rootCreateError}</span>}
             </div>
           )}
           {filesTree.children.map((child) => (

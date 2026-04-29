@@ -27,8 +27,8 @@ const Editor = ({ filesTree, openedFiles, activeFile, setActiveFile, closeFile, 
   const activeContent = activeNode ? activeNode.content : '';
 
   return (
-    <div className="h-full w-full flex flex-col bg-[#1e1e1e] border-r border-[#30363d]">
-      <div className="flex bg-[#252526] text-gray-300 text-sm overflow-x-auto scrollbar-hide border-b border-[#30363d]">
+    <div className="h-full w-full flex flex-col bg-[#1e1e1e] border-r border-[#30363d] overflow-hidden">
+      <div className="flex bg-[#252526] text-gray-300 text-sm overflow-x-auto scrollbar-hide border-b border-[#30363d] shrink-0">
         {openedFiles.map(filePath => {
           const node = findNode(filesTree, filePath);
           const name = node ? node.name : filePath.split('/').pop();
@@ -71,8 +71,9 @@ const Editor = ({ filesTree, openedFiles, activeFile, setActiveFile, closeFile, 
             }}
           />
         ) : (
-          <div className="flex items-center justify-center h-full text-gray-500">
-            <p>Select a file to start editing</p>
+          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+            <p className="text-lg mb-2">No file open</p>
+            <p className="text-sm opacity-70">Create a file to start coding</p>
           </div>
         )}
       </div>

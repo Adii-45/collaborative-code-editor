@@ -2,14 +2,7 @@ export const initialFileSystem = {
   id: "root",
   name: "root",
   type: "folder",
-  children: [
-    {
-      id: "src",
-      name: "src",
-      type: "folder",
-      children: []
-    }
-  ]
+  children: []
 };
 
 export const findNode = (tree, id) => {
@@ -45,6 +38,9 @@ export const addNode = (tree, parentId, newNode) => {
   const newTree = JSON.parse(JSON.stringify(tree));
   const parent = findNode(newTree, parentId);
   if (parent && parent.type === 'folder') {
+    if (parent.children.some(c => c.name === newNode.name)) {
+      return newTree; // Prevent duplicate names
+    }
     parent.children.push(newNode);
     sortChildren(parent.children);
   }
@@ -65,6 +61,9 @@ export const renameNode = (tree, id, newName) => {
   const newTree = JSON.parse(JSON.stringify(tree));
   const node = findNode(newTree, id);
   const parent = findParent(newTree, id);
+  if (parent && parent.children.some(c => c.name === newName && c.id !== id)) {
+    return newTree; // Prevent renaming to an existing name
+  }
   if (node) {
     node.name = newName;
   }
