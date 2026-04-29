@@ -5,6 +5,6 @@ import { protect } from '../middleware/auth.js';
 const router = express.Router();
 
 // Protected: only authenticated users can execute commands
-router.post('/execute', protect, execute);
+router.post('/run', protect, execute);
 
 export default router;
