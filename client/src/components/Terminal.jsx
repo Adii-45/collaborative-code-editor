@@ -1,157 +1,146 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Terminal as XTerm } from 'xterm';
-import { FitAddon } from '@xterm/addon-fit';
-import { Plus, X } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Plus, X, Loader2 } from 'lucide-react';
 import api from '../utils/api';
-import 'xterm/css/xterm.css';
 
-/**
- * TerminalWindow: A single xterm.js instance that sends commands
- * to the backend API for execution.
- */
-const TerminalWindow = ({ id, isActive }) => {
-  const terminalRef = useRef(null);
-  const xtermRef = useRef(null);
-  const fitAddonRef = useRef(null);
+const TerminalWindow = ({ id, isActive, projectId }) => {
+  const [logs, setLogs] = useState([
+    { type: 'info', text: '═══ Code Editor Terminal ═══' },
+    { type: 'info', text: 'Type "help" for available commands.' },
+    { type: 'info', text: 'Allowed commands: ls, pwd, npm install, node <file>' },
+    { type: 'info', text: '' },
+  ]);
+  const [input, setInput] = useState('');
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isExecuting, setIsExecuting] = useState(false);
+  
+  const bottomRef = useRef(null);
+  const inputRef = useRef(null);
 
+  // Auto-scroll to bottom when logs change
   useEffect(() => {
-    if (!terminalRef.current) return;
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [logs]);
 
-    // Delay init to ensure DOM is painted with valid dimensions
-    const initTimer = setTimeout(() => {
-      if (!terminalRef.current) return;
-
-      const term = new XTerm({
-        theme: {
-          background: '#1e1e1e',
-          foreground: '#cccccc',
-          cursor: '#ffffff',
-          selectionBackground: '#264f78',
-        },
-        fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-        fontSize: 14,
-        cursorBlink: true,
-      });
-
-      const fitAddon = new FitAddon();
-      fitAddonRef.current = fitAddon;
-      term.loadAddon(fitAddon);
-
-      term.open(terminalRef.current);
-      try { fitAddon.fit(); } catch (e) {}
-
-      term.writeln('\x1b[1;34m═══ Code Editor Terminal ═══\x1b[0m');
-      term.writeln('\x1b[90mType "help" for available commands.\x1b[0m');
-      term.writeln('');
-      term.write('$ ');
-
-      let command = '';
-      let isExecuting = false;
-
-      term.onData(async (data) => {
-        // Block input while a command is running
-        if (isExecuting) return;
-
-        const char = data;
-
-        if (char === '\r') {
-          // Enter: execute command
-          term.write('\r\n');
-          const cmd = command.trim();
-
-          if (cmd === '') {
-            term.write('$ ');
-            command = '';
-            return;
-          }
-
-          if (cmd === 'clear') {
-            term.clear();
-            term.write('$ ');
-            command = '';
-            return;
-          }
-
-          // Send command to backend
-          isExecuting = true;
-          try {
-            const { data: result } = await api.post('/terminal/execute', { command: cmd });
-
-            if (result.clear) {
-              term.clear();
-            } else {
-              if (result.stdout) {
-                term.writeln(result.stdout);
-              }
-              if (result.stderr) {
-                term.writeln(`\x1b[31m${result.stderr}\x1b[0m`);
-              }
-            }
-          } catch (error) {
-            const msg = error.response?.data?.message || 'Command execution failed';
-            term.writeln(`\x1b[31mError: ${msg}\x1b[0m`);
-          }
-
-          isExecuting = false;
-          command = '';
-          term.write('$ ');
-        } else if (char === '\x7F') {
-          // Backspace
-          if (command.length > 0) {
-            command = command.slice(0, -1);
-            term.write('\b \b');
-          }
-        } else if (char >= String.fromCharCode(0x20) && char <= String.fromCharCode(0x7E)) {
-          // Printable characters
-          command += char;
-          term.write(char);
-        }
-      });
-
-      xtermRef.current = term;
-    }, 50);
-
-    return () => {
-      clearTimeout(initTimer);
-      if (xtermRef.current) {
-        xtermRef.current.dispose();
-      }
-    };
-  }, [id]);
-
-  // Fit when it becomes active
+  // Focus input when terminal becomes active
   useEffect(() => {
-    if (isActive && fitAddonRef.current) {
-      setTimeout(() => {
-        try { fitAddonRef.current.fit(); } catch (e) {}
-      }, 50);
+    if (isActive && inputRef.current) {
+      inputRef.current.focus();
     }
   }, [isActive]);
 
-  useEffect(() => {
-    const observer = new ResizeObserver(() => {
-      if (isActive && fitAddonRef.current) {
-        try { fitAddonRef.current.fit(); } catch (e) {}
+  const handleKeyDown = async (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const cmd = input.trim();
+      
+      if (!cmd) {
+        setLogs(prev => [...prev, { type: 'command', text: '$ ' }]);
+        return;
       }
-    });
-    if (terminalRef.current) observer.observe(terminalRef.current);
 
-    return () => observer.disconnect();
-  }, [isActive]);
+      if (cmd === 'clear') {
+        setLogs([]);
+        setInput('');
+        return;
+      }
+
+      // Add to logs and history
+      setLogs(prev => [...prev, { type: 'command', text: `$ ${cmd}` }]);
+      setHistory(prev => [cmd, ...prev]);
+      setHistoryIndex(-1);
+      setInput('');
+      setIsExecuting(true);
+
+      try {
+        const { data: result } = await api.post('/terminal/run', { command: cmd, projectId });
+        
+        if (result.stdout) {
+          setLogs(prev => [...prev, { type: 'stdout', text: result.stdout }]);
+        }
+        if (result.stderr) {
+          setLogs(prev => [...prev, { type: 'stderr', text: result.stderr }]);
+        }
+        if (!result.stdout && !result.stderr && result.exitCode === 0) {
+           // Provide some feedback if command succeeds silently (like 'npm install' might if suppressed, though it usually outputs)
+           // Or just leave empty
+        }
+      } catch (error) {
+        const msg = error.response?.data?.message || error.message || 'Execution failed';
+        setLogs(prev => [...prev, { type: 'error', text: `Error: ${msg}` }]);
+      } finally {
+        setIsExecuting(false);
+        // Refocus input
+        setTimeout(() => {
+          if (inputRef.current) inputRef.current.focus();
+        }, 0);
+      }
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (history.length > 0) {
+        const nextIdx = Math.min(historyIndex + 1, history.length - 1);
+        setHistoryIndex(nextIdx);
+        setInput(history[nextIdx]);
+      }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (historyIndex > 0) {
+        const nextIdx = historyIndex - 1;
+        setHistoryIndex(nextIdx);
+        setInput(history[nextIdx]);
+      } else if (historyIndex === 0) {
+        setHistoryIndex(-1);
+        setInput('');
+      }
+    }
+  };
 
   return (
-    <div
-      ref={terminalRef}
-      className="w-full h-full"
-      style={{ display: isActive ? 'block' : 'none' }}
-    />
+    <div 
+      className="w-full h-full flex flex-col font-mono text-[14px] leading-tight"
+      style={{ display: isActive ? 'flex' : 'none' }}
+      onClick={() => inputRef.current?.focus()}
+    >
+      <div className="flex-1 overflow-y-auto p-3 text-gray-300">
+        {logs.map((log, i) => (
+          <div key={i} className="mb-1 whitespace-pre-wrap word-break">
+            {log.type === 'command' && <span className="text-white">{log.text}</span>}
+            {log.type === 'stdout' && <span>{log.text}</span>}
+            {log.type === 'stderr' && <span className="text-red-400">{log.text}</span>}
+            {log.type === 'error' && <span className="text-red-500 font-bold">{log.text}</span>}
+            {log.type === 'info' && <span className="text-blue-400 font-bold">{log.text}</span>}
+          </div>
+        ))}
+        
+        <div className="flex items-center gap-2 mt-1">
+          <span className="text-green-400 font-bold">$</span>
+          {isExecuting ? (
+            <div className="flex items-center gap-2 text-gray-500">
+              <Loader2 size={14} className="animate-spin" />
+              <span>Running...</span>
+            </div>
+          ) : (
+            <input
+              ref={inputRef}
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="flex-1 bg-transparent outline-none border-none text-white focus:ring-0 p-0 m-0"
+              spellCheck={false}
+              autoComplete="off"
+            />
+          )}
+        </div>
+        <div ref={bottomRef} className="h-4" />
+      </div>
+    </div>
   );
 };
 
-/**
- * Terminal: Multi-tab terminal wrapper.
- */
-const Terminal = () => {
+const Terminal = ({ projectId }) => {
   const [terminals, setTerminals] = useState([{ id: 1, name: 'bash' }]);
   const [activeId, setActiveId] = useState(1);
   const [nextId, setNextId] = useState(2);
@@ -202,7 +191,7 @@ const Terminal = () => {
           <Plus size={14} />
         </button>
       </div>
-      <div className="flex-1 p-2 relative h-full w-full">
+      <div className="flex-1 relative h-full w-full bg-[#1e1e1e]">
         {terminals.length === 0 ? (
           <div className="flex h-full items-center justify-center text-gray-500 text-sm">
             No active terminals. Click + to create one.
@@ -213,6 +202,7 @@ const Terminal = () => {
               key={t.id}
               id={t.id}
               isActive={activeId === t.id}
+              projectId={projectId}
             />
           ))
         )}

@@ -252,7 +252,7 @@ const Room = () => {
                 <>
                   <PanelResizeHandle className="h-1 bg-[#30363d] hover:bg-blue-500 transition-colors cursor-row-resize z-10" />
                   <Panel defaultSize={30} minSize={15}>
-                    <Terminal />
+                    <Terminal projectId={projectId} />
                   </Panel>
                 </>
               )}
