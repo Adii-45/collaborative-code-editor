@@ -5,7 +5,9 @@ import {
   getProject,
   updateFileTree,
   deleteProject,
-  addCollaborator,
+  renameProject,
+  inviteEmail,
+  inviteLink
 } from '../controllers/projectController.js';
 import { protect } from '../middleware/auth.js';
 
@@ -20,9 +22,11 @@ router.route('/')
 
 router.route('/:id')
   .get(getProject)
+  .put(renameProject)
   .delete(deleteProject);
 
 router.put('/:id/tree', updateFileTree);
-router.post('/:id/collaborators', addCollaborator);
+router.post('/:id/invite-email', inviteEmail);
+router.post('/:id/invite-link', inviteLink);
 
 export default router;
