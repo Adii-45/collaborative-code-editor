@@ -19,8 +19,31 @@ const projectSchema = new mongoose.Schema({
     required: true,
   },
   collaborators: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ['owner', 'editor', 'viewer'],
+      default: 'editor',
+    }
+  }],
+  inviteLinks: [{
+    token: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ['editor', 'viewer'],
+      default: 'editor',
+    },
+    expiresAt: {
+      type: Date,
+      required: true,
+    }
   }],
   /**
    * fileTree stores the nested file/folder structure as-is from the frontend.
@@ -37,6 +60,17 @@ const projectSchema = new mongoose.Schema({
   },
 }, {
   timestamps: true,
+});
+
+// Pre-save hook to ensure owner is in collaborators
+projectSchema.pre('save', function(next) {
+  if (this.isNew) {
+    const ownerExists = this.collaborators.some(c => c.user.toString() === this.owner.toString());
+    if (!ownerExists) {
+      this.collaborators.push({ user: this.owner, role: 'owner' });
+    }
+  }
+  next();
 });
 
 // Compound index: a user cannot have two projects with the same name

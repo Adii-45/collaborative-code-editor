@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import Project from '../models/Project.js';
 
 /**
@@ -22,6 +23,7 @@ export const createProject = async (req, res) => {
     const project = await Project.create({
       name,
       owner: req.user._id,
+      // pre-save hook will automatically add owner to collaborators
     });
 
     res.status(201).json(project);
@@ -40,10 +42,11 @@ export const getMyProjects = async (req, res) => {
     const projects = await Project.find({
       $or: [
         { owner: req.user._id },
-        { collaborators: req.user._id },
+        { 'collaborators.user': req.user._id },
       ],
     })
       .populate('owner', 'username email')
+      .populate('collaborators.user', 'username email')
       .sort({ updatedAt: -1 });
 
     res.json(projects);
@@ -61,7 +64,7 @@ export const getProject = async (req, res) => {
   try {
     const project = await Project.findById(req.params.id)
       .populate('owner', 'username email')
-      .populate('collaborators', 'username email');
+      .populate('collaborators.user', 'username email');
 
     if (!project) {
       return res.status(404).json({ message: 'Project not found' });
@@ -70,7 +73,7 @@ export const getProject = async (req, res) => {
     // Authorization check: only owner or collaborators can access
     const isOwner = project.owner._id.toString() === req.user._id.toString();
     const isCollaborator = project.collaborators.some(
-      c => c._id.toString() === req.user._id.toString()
+      c => c.user._id.toString() === req.user._id.toString()
     );
 
     if (!isOwner && !isCollaborator) {
@@ -100,13 +103,12 @@ export const updateFileTree = async (req, res) => {
       return res.status(404).json({ message: 'Project not found' });
     }
 
-    // Authorization check
+    // Authorization check: owner or editor role required to update tree
+    // Find the user's role
+    const collab = project.collaborators.find(c => c.user.toString() === req.user._id.toString());
     const isOwner = project.owner.toString() === req.user._id.toString();
-    const isCollaborator = project.collaborators.some(
-      c => c.toString() === req.user._id.toString()
-    );
-
-    if (!isOwner && !isCollaborator) {
+    
+    if (!isOwner && (!collab || collab.role === 'viewer')) {
       return res.status(403).json({ message: 'Not authorized to modify this project' });
     }
 
@@ -146,13 +148,18 @@ export const deleteProject = async (req, res) => {
 };
 
 /**
- * @route   POST /api/projects/:id/collaborators
- * @desc    Add a collaborator by email
- * @access  Private (owner only)
+ * @route   PUT /api/projects/:id
+ * @desc    Rename a project (owner only)
+ * @access  Private
  */
-export const addCollaborator = async (req, res) => {
+export const renameProject = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { name } = req.body;
+    
+    if (!name || !name.trim()) {
+      return res.status(400).json({ message: 'Project name is required' });
+    }
+
     const project = await Project.findById(req.params.id);
 
     if (!project) {
@@ -160,7 +167,49 @@ export const addCollaborator = async (req, res) => {
     }
 
     if (project.owner.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Only the owner can add collaborators' });
+      return res.status(403).json({ message: 'Only the owner can rename this project' });
+    }
+
+    // Check for duplicate name
+    const existing = await Project.findOne({ owner: req.user._id, name: name.trim() });
+    if (existing && existing._id.toString() !== project._id.toString()) {
+      return res.status(400).json({ message: 'You already have a project with this name' });
+    }
+
+    project.name = name.trim();
+    await project.save();
+
+    res.json({ message: 'Project renamed', project });
+  } catch (error) {
+    res.status(500).json({ message: 'Error renaming project' });
+  }
+};
+
+/**
+ * @route   POST /api/projects/:id/invite-email
+ * @desc    Add a collaborator by email
+ * @access  Private (owner or editor)
+ */
+export const inviteEmail = async (req, res) => {
+  try {
+    const { email, role = 'editor' } = req.body;
+    
+    if (!['editor', 'viewer'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role' });
+    }
+
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Auth check: Only owners and editors can invite
+    const isOwner = project.owner.toString() === req.user._id.toString();
+    const collab = project.collaborators.find(c => c.user.toString() === req.user._id.toString());
+    
+    if (!isOwner && (!collab || collab.role === 'viewer')) {
+      return res.status(403).json({ message: 'Only owners and editors can invite collaborators' });
     }
 
     // Find user by email
@@ -171,20 +220,59 @@ export const addCollaborator = async (req, res) => {
     }
 
     // Check if already a collaborator
-    if (project.collaborators.includes(user._id)) {
+    const existingCollab = project.collaborators.find(c => c.user.toString() === user._id.toString());
+    if (existingCollab) {
       return res.status(400).json({ message: 'User is already a collaborator' });
     }
 
-    // Cannot add self
-    if (user._id.toString() === req.user._id.toString()) {
-      return res.status(400).json({ message: 'You are already the owner' });
-    }
-
-    project.collaborators.push(user._id);
+    project.collaborators.push({ user: user._id, role });
     await project.save();
 
-    res.json({ message: `${user.username} added as collaborator` });
+    // In a real app, send email here via nodemailer
+
+    res.json({ message: `${user.username} invited as ${role}` });
   } catch (error) {
     res.status(500).json({ message: 'Error adding collaborator' });
+  }
+};
+
+/**
+ * @route   POST /api/projects/:id/invite-link
+ * @desc    Generate a shareable invite link
+ * @access  Private (owner or editor)
+ */
+export const inviteLink = async (req, res) => {
+  try {
+    const { role = 'editor' } = req.body;
+    
+    if (!['editor', 'viewer'].includes(role)) {
+      return res.status(400).json({ message: 'Invalid role' });
+    }
+
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+      return res.status(404).json({ message: 'Project not found' });
+    }
+
+    // Auth check: Only owners and editors can invite
+    const isOwner = project.owner.toString() === req.user._id.toString();
+    const collab = project.collaborators.find(c => c.user.toString() === req.user._id.toString());
+    
+    if (!isOwner && (!collab || collab.role === 'viewer')) {
+      return res.status(403).json({ message: 'Only owners and editors can generate invite links' });
+    }
+
+    // Generate token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiresAt = new Date();
+    expiresAt.setHours(expiresAt.getHours() + 24); // 24 hour expiry
+
+    project.inviteLinks.push({ token, role, expiresAt });
+    await project.save();
+
+    res.json({ token, expiresAt, role });
+  } catch (error) {
+    res.status(500).json({ message: 'Error generating invite link' });
   }
 };
