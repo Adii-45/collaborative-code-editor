@@ -2,14 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { Code2, Plus, Trash2, FolderOpen, LogOut, Clock } from 'lucide-react';
+import { Code2, Plus, Trash2, FolderOpen, LogOut, Clock, Edit2, UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
+import InviteModal from '../components/InviteModal';
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [isCreating, setIsCreating] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
   const [loading, setLoading] = useState(true);
+  
+  // Modals state
+  const [inviteModalOpen, setInviteModalOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [renameProjectId, setRenameProjectId] = useState(null);
+  const [renameValue, setRenameValue] = useState('');
+
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -38,7 +46,8 @@ const Dashboard = () => {
 
     try {
       const { data } = await api.post('/projects', { name: newProjectName.trim() });
-      setProjects(prev => [data, ...prev]);
+      // Reload projects to get fully populated owner/collaborators
+      fetchProjects();
       setNewProjectName('');
       setIsCreating(false);
       toast.success('Project created!');
@@ -55,8 +64,25 @@ const Dashboard = () => {
       setProjects(prev => prev.filter(p => p._id !== id));
       toast.success('Project deleted');
     } catch (error) {
-      toast.error('Failed to delete project');
+      toast.error(error.response?.data?.message || 'Failed to delete project');
     }
+  };
+
+  const handleRenameSubmit = async (id) => {
+    if (!renameValue.trim()) return;
+    try {
+      const { data } = await api.put(`/projects/${id}`, { name: renameValue.trim() });
+      setProjects(prev => prev.map(p => p._id === id ? { ...p, name: data.project.name } : p));
+      setRenameProjectId(null);
+      toast.success('Project renamed');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to rename project');
+    }
+  };
+
+  const openInviteModal = (project) => {
+    setSelectedProject(project);
+    setInviteModalOpen(true);
   };
 
   const handleLogout = () => {
@@ -71,6 +97,11 @@ const Dashboard = () => {
       day: 'numeric',
       year: 'numeric',
     });
+  };
+
+  // Helper to get initials
+  const getInitials = (name) => {
+    return name ? name.charAt(0).toUpperCase() : '?';
   };
 
   return (
@@ -105,7 +136,7 @@ const Dashboard = () => {
           <h2 className="text-xl font-semibold">Your Projects</h2>
           <button
             onClick={() => setIsCreating(true)}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
           >
             <Plus size={16} />
             New Project
@@ -150,48 +181,131 @@ const Dashboard = () => {
             <p className="text-gray-500 text-sm">Create your first project to start coding</p>
           </div>
         ) : (
-          <div className="grid gap-3">
-            {projects.map(project => (
-              <div
-                key={project._id}
-                className="bg-[#161b22] border border-[#30363d] rounded-xl p-4 flex items-center justify-between hover:border-[#484f58] transition-colors group"
-              >
+          <div className="grid gap-4">
+            {projects.map(project => {
+              const isOwner = project.owner._id === user._id || project.owner === user._id;
+              
+              // Find user's role
+              let myRole = 'Owner';
+              if (!isOwner) {
+                const collab = project.collaborators?.find(c => c.user._id === user._id || c.user === user._id);
+                myRole = collab ? collab.role : 'Member';
+              }
+
+              // Gather all unique users for avatars
+              const usersList = [project.owner, ...(project.collaborators?.map(c => c.user) || [])].filter(Boolean);
+              // Deduplicate users by ID
+              const uniqueUsers = Array.from(new Map(usersList.map(u => [u._id, u])).values());
+
+              return (
                 <div
-                  className="flex items-center gap-3 flex-1 cursor-pointer"
-                  onClick={() => navigate(`/editor/${project._id}`)}
+                  key={project._id}
+                  className="bg-[#161b22] border border-[#30363d] rounded-xl p-5 hover:border-[#484f58] transition-colors group flex items-center justify-between"
                 >
-                  <div className="bg-[#21262d] p-2.5 rounded-lg">
-                    <Code2 size={18} className="text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium text-white group-hover:text-blue-400 transition-colors">
-                      {project.name}
-                    </h3>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <Clock size={12} className="text-gray-500" />
-                      <span className="text-xs text-gray-500">
-                        Updated {formatDate(project.updatedAt)}
+                  <div
+                    className="flex flex-col flex-1 cursor-pointer pr-4"
+                    onClick={() => navigate(`/editor/${project._id}`)}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="bg-[#21262d] p-2 rounded-lg">
+                        <Code2 size={18} className="text-blue-400" />
+                      </div>
+                      
+                      {renameProjectId === project._id ? (
+                        <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            autoFocus
+                            value={renameValue}
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit(project._id)}
+                            className="bg-[#0d1117] border border-blue-500 rounded px-2 py-1 text-sm text-white focus:outline-none"
+                          />
+                          <button onClick={() => handleRenameSubmit(project._id)} className="text-xs bg-blue-600 text-white px-2 py-1 rounded">Save</button>
+                          <button onClick={() => setRenameProjectId(null)} className="text-xs text-gray-400">Cancel</button>
+                        </div>
+                      ) : (
+                        <h3 className="font-semibold text-white text-lg group-hover:text-blue-400 transition-colors">
+                          {project.name}
+                        </h3>
+                      )}
+                      
+                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#21262d] text-gray-400 border border-[#30363d]">
+                        {myRole}
                       </span>
-                      {project.collaborators?.length > 0 && (
-                        <span className="text-xs text-gray-500">
-                          · {project.collaborators.length} collaborator{project.collaborators.length > 1 ? 's' : ''}
-                        </span>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 mt-1">
+                      <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                        <Clock size={14} />
+                        <span>Updated {formatDate(project.updatedAt)}</span>
+                      </div>
+                      
+                      {uniqueUsers.length > 0 && (
+                        <div className="flex -space-x-2">
+                          {uniqueUsers.slice(0, 3).map((u, i) => (
+                            <div 
+                              key={i} 
+                              className="w-6 h-6 rounded-full bg-[#30363d] border-2 border-[#161b22] flex items-center justify-center text-[10px] font-bold text-white z-10"
+                              title={u.username || u.email}
+                            >
+                              {getInitials(u.username || u.email)}
+                            </div>
+                          ))}
+                          {uniqueUsers.length > 3 && (
+                            <div className="w-6 h-6 rounded-full bg-[#21262d] border-2 border-[#161b22] flex items-center justify-center text-[10px] font-bold text-gray-400 z-0">
+                              +{uniqueUsers.length - 3}
+                            </div>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {isOwner && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setRenameValue(project.name); setRenameProjectId(project._id); }}
+                        className="p-2 text-gray-400 hover:text-white hover:bg-[#30363d] rounded-md transition-colors"
+                        title="Rename Project"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                    )}
+                    
+                    {(isOwner || myRole === 'editor') && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); openInviteModal(project); }}
+                        className="p-2 text-gray-400 hover:text-blue-400 hover:bg-[#30363d] rounded-md transition-colors"
+                        title="Invite Collaborators"
+                      >
+                        <UserPlus size={16} />
+                      </button>
+                    )}
+                    
+                    {isOwner && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handleDeleteProject(project._id, project.name); }}
+                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-[#30363d] rounded-md transition-colors"
+                        title="Delete Project"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
                 </div>
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleDeleteProject(project._id, project.name); }}
-                  className="text-gray-500 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all p-2"
-                  title="Delete project"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </main>
+
+      <InviteModal 
+        isOpen={inviteModalOpen} 
+        onClose={() => { setInviteModalOpen(false); fetchProjects(); }} 
+        project={selectedProject}
+        user={user}
+      />
     </div>
   );
 };
