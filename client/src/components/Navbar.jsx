@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Play, Square, UserPlus, Code2, Terminal as TerminalIcon, ArrowLeft, LogOut, Users } from 'lucide-react';
+import { Play, Square, UserPlus, Code2, Terminal as TerminalIcon, ArrowLeft, LogOut, Users, Github, ArrowUpRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import InviteModal from './InviteModal';
+import CommitModal from './CommitModal';
 
 const Navbar = ({ isRunning, toggleRun, toggleTerminal, showTerminal, projectName, connectedUsers, projectId, project }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
+  const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -28,7 +30,11 @@ const Navbar = ({ isRunning, toggleRun, toggleTerminal, showTerminal, projectNam
             <ArrowLeft size={18} />
           </button>
           <div className="bg-blue-600 p-1.5 rounded-md">
-            <Code2 size={18} className="text-white" />
+            {project?.isGithubLinked ? (
+              <Github size={18} className="text-white" />
+            ) : (
+              <Code2 size={18} className="text-white" />
+            )}
           </div>
           <span className="font-semibold text-sm tracking-wide text-gray-200">
             {projectName || 'Untitled Project'}
@@ -44,6 +50,16 @@ const Navbar = ({ isRunning, toggleRun, toggleTerminal, showTerminal, projectNam
 
         {/* Right: Actions */}
         <div className="flex items-center gap-3">
+          {project?.isGithubLinked && (
+            <button
+              onClick={() => setIsCommitModalOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-gray-300 hover:text-white text-sm font-medium rounded-md transition-colors"
+            >
+              <ArrowUpRight size={16} className="text-green-400" />
+              <span>Commit & Push</span>
+            </button>
+          )}
+
           <button
             onClick={toggleRun}
             className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-sm font-medium rounded-md transition-colors ${
@@ -95,6 +111,11 @@ const Navbar = ({ isRunning, toggleRun, toggleTerminal, showTerminal, projectNam
         onClose={() => setIsInviteModalOpen(false)} 
         project={project}
         user={user}
+      />
+      <CommitModal 
+        isOpen={isCommitModalOpen} 
+        onClose={() => setIsCommitModalOpen(false)} 
+        projectId={projectId} 
       />
     </>
   );

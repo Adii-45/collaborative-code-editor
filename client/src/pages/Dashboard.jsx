@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { Code2, Plus, Trash2, FolderOpen, LogOut, Clock, Edit2, UserPlus } from 'lucide-react';
+import { Code2, Plus, Trash2, FolderOpen, LogOut, Clock, Edit2, UserPlus, Github, Download } from 'lucide-react';
 import toast from 'react-hot-toast';
 import InviteModal from '../components/InviteModal';
 
@@ -17,6 +17,12 @@ const Dashboard = () => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [renameProjectId, setRenameProjectId] = useState(null);
   const [renameValue, setRenameValue] = useState('');
+
+  // GitHub Import state
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importRepoUrl, setImportRepoUrl] = useState('');
+  const [importProjectId, setImportProjectId] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
 
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -46,7 +52,6 @@ const Dashboard = () => {
 
     try {
       const { data } = await api.post('/projects', { name: newProjectName.trim() });
-      // Reload projects to get fully populated owner/collaborators
       fetchProjects();
       setNewProjectName('');
       setIsCreating(false);
@@ -80,6 +85,38 @@ const Dashboard = () => {
     }
   };
 
+  const handleConnectGitHub = () => {
+    // Redirect to GitHub OAuth
+    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID || 'dummy_client_id'; // Fallback for dev if not set
+    const redirectUri = `${window.location.origin}/github/callback`;
+    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo,user&redirect_uri=${redirectUri}`;
+  };
+
+  const handleImportSubmit = async (e) => {
+    e.preventDefault();
+    if (!importRepoUrl || !importProjectId) {
+      toast.error('Repo URL and Project selection required');
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      await api.post('/github/import', {
+        projectId: importProjectId,
+        repoUrl: importRepoUrl
+      });
+      toast.success('Repository imported successfully!');
+      setIsImportModalOpen(false);
+      setImportRepoUrl('');
+      setImportProjectId('');
+      fetchProjects();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to import repository');
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
   const openInviteModal = (project) => {
     setSelectedProject(project);
     setInviteModalOpen(true);
@@ -99,10 +136,11 @@ const Dashboard = () => {
     });
   };
 
-  // Helper to get initials
   const getInitials = (name) => {
     return name ? name.charAt(0).toUpperCase() : '?';
   };
+
+  const myOwnedProjects = projects.filter(p => p.owner._id === user._id || p.owner === user._id);
 
   return (
     <div className="min-h-screen bg-[#0d1117] text-white">
@@ -134,13 +172,29 @@ const Dashboard = () => {
       <main className="max-w-5xl mx-auto px-6 py-8">
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-xl font-semibold">Your Projects</h2>
-          <button
-            onClick={() => setIsCreating(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-          >
-            <Plus size={16} />
-            New Project
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleConnectGitHub}
+              className="flex items-center gap-2 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              <Github size={16} />
+              {user?.githubUsername ? `Connected: ${user.githubUsername}` : 'Connect GitHub'}
+            </button>
+            <button
+              onClick={() => setIsImportModalOpen(true)}
+              className="flex items-center gap-2 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              <Download size={16} />
+              Import Repo
+            </button>
+            <button
+              onClick={() => setIsCreating(true)}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              <Plus size={16} />
+              New Project
+            </button>
+          </div>
         </div>
 
         {/* Create Project Inline */}
@@ -167,6 +221,61 @@ const Dashboard = () => {
               Cancel
             </button>
           </form>
+        )}
+
+        {/* Import Repo Modal */}
+        {isImportModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-[#161b22] border border-[#30363d] rounded-xl p-6 w-full max-w-md shadow-2xl">
+              <h3 className="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+                <Github size={20} /> Import Repository
+              </h3>
+              <form onSubmit={handleImportSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Repository URL</label>
+                  <input
+                    type="url"
+                    required
+                    value={importRepoUrl}
+                    onChange={(e) => setImportRepoUrl(e.target.value)}
+                    placeholder="https://github.com/user/repo"
+                    className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-gray-400 mb-1">Target Project</label>
+                  <select
+                    required
+                    value={importProjectId}
+                    onChange={(e) => setImportProjectId(e.target.value)}
+                    className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="">Select a project to import into...</option>
+                    {myOwnedProjects.map(p => (
+                      <option key={p._id} value={p._id}>{p.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-yellow-500 mt-1">Warning: Importing will overwrite the selected project's files.</p>
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsImportModalOpen(false)}
+                    className="flex-1 py-2 rounded-lg font-medium text-sm text-gray-300 hover:text-white bg-[#21262d] hover:bg-[#30363d] transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isImporting || !importRepoUrl || !importProjectId}
+                    className="flex-1 py-2 rounded-lg font-medium text-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    {isImporting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Import'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
         )}
 
         {/* Project List */}
@@ -208,7 +317,11 @@ const Dashboard = () => {
                   >
                     <div className="flex items-center gap-3 mb-2">
                       <div className="bg-[#21262d] p-2 rounded-lg">
-                        <Code2 size={18} className="text-blue-400" />
+                        {project.isGithubLinked ? (
+                          <Github size={18} className="text-green-400" />
+                        ) : (
+                          <Code2 size={18} className="text-blue-400" />
+                        )}
                       </div>
                       
                       {renameProjectId === project._id ? (
@@ -239,6 +352,13 @@ const Dashboard = () => {
                         <Clock size={14} />
                         <span>Updated {formatDate(project.updatedAt)}</span>
                       </div>
+                      
+                      {project.isGithubLinked && (
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                          <Github size={14} />
+                          <span>Linked</span>
+                        </div>
+                      )}
                       
                       {uniqueUsers.length > 0 && (
                         <div className="flex -space-x-2">

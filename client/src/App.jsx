@@ -8,6 +8,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Room from './pages/Room';
 import AcceptInvite from './pages/AcceptInvite';
+import GitHubCallback from './pages/GitHubCallback';
 
 function App() {
   return (
@@ -41,6 +42,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <AcceptInvite />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/github/callback"
+              element={
+                <ProtectedRoute>
+                  <GitHubCallback />
                 </ProtectedRoute>
               }
             />
