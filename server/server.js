@@ -2,40 +2,61 @@ import express from 'express';
 import cors from 'cors';
 import http from 'http';
 import { Server } from 'socket.io';
+import dotenv from 'dotenv';
+
+// Load environment variables FIRST
+dotenv.config();
+
+import connectDB from './config/db.js';
+import authRoutes from './routes/authRoutes.js';
+import projectRoutes from './routes/projectRoutes.js';
+import terminalRoutes from './routes/terminalRoutes.js';
+import errorHandler from './middleware/errorHandler.js';
+import setupSocket from './socket/index.js';
+
+// Connect to MongoDB
+connectDB();
 
 const app = express();
 const server = http.createServer(app);
 
-// Enable CORS for all routes
-app.use(cors());
-app.use(express.json());
+// ─── Middleware ───────────────────────────────────────────
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production'
+    ? process.env.CLIENT_URL
+    : '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true,
+}));
+app.use(express.json({ limit: '10mb' })); // Increased limit for large file trees
 
-// Placeholder for future Socket.io setup
+// ─── API Routes ──────────────────────────────────────────
+app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/terminal', terminalRoutes);
+
+// Health check
+app.get('/', (req, res) => {
+  res.json({ status: 'Code Editor API is running', timestamp: new Date().toISOString() });
+});
+
+// ─── Error Handler ───────────────────────────────────────
+app.use(errorHandler);
+
+// ─── Socket.io Setup ─────────────────────────────────────
 const io = new Server(server, {
   cors: {
-    origin: "*", // allow all origins for local dev
-    methods: ["GET", "POST"]
-  }
+    origin: '*',
+    methods: ['GET', 'POST'],
+  },
 });
 
-io.on('connection', (socket) => {
-  console.log('A user connected:', socket.id);
+setupSocket(io);
 
-  // Future real-time collaboration events will go here
-  // e.g. socket.on('code-change', ...)
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected:', socket.id);
-  });
-});
-
-// Basic route to test server
-app.get('/', (req, res) => {
-  res.send('Code Editor API is running.');
-});
-
+// ─── Start Server ────────────────────────────────────────
 const PORT = process.env.PORT || 5001;
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
 });
