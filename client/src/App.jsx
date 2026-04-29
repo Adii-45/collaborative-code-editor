@@ -7,6 +7,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Room from './pages/Room';
+import AcceptInvite from './pages/AcceptInvite';
 
 function App() {
   return (
@@ -32,6 +33,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Room />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/invite/:token"
+              element={
+                <ProtectedRoute>
+                  <AcceptInvite />
                 </ProtectedRoute>
               }
             />
