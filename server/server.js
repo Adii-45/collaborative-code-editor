@@ -12,6 +12,7 @@ import authRoutes from './routes/authRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import terminalRoutes from './routes/terminalRoutes.js';
 import inviteRoutes from './routes/inviteRoutes.js';
+import githubRoutes from './routes/githubRoutes.js';
 import errorHandler from './middleware/errorHandler.js';
 import setupSocket from './socket/index.js';
 
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/terminal', terminalRoutes);
 app.use('/api/invite', inviteRoutes);
+app.use('/api/github', githubRoutes);
 
 // Health check
 app.get('/', (req, res) => {
@@ -56,7 +58,7 @@ const io = new Server(server, {
 setupSocket(io);
 
 // ─── Start Server ────────────────────────────────────────
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT || 8001;
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
