@@ -45,6 +45,13 @@ const projectSchema = new mongoose.Schema({
       required: true,
     }
   }],
+  isGithubLinked: {
+    type: Boolean,
+    default: false,
+  },
+  githubRepoUrl: {
+    type: String,
+  },
   /**
    * fileTree stores the nested file/folder structure as-is from the frontend.
    * Shape: { id: "root", name: "root", type: "folder", children: [...] }

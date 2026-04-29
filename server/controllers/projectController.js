@@ -1,5 +1,12 @@
 import crypto from 'crypto';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import Project from '../models/Project.js';
+import { syncTreeToDisk } from '../utils/fsUtils.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const REPOS_DIR = path.join(__dirname, '..', 'repos');
 
 /**
  * @route   POST /api/projects
@@ -116,6 +123,14 @@ export const updateFileTree = async (req, res) => {
     project.fileTree = fileTree;
     project.markModified('fileTree');
     await project.save();
+
+    // If GitHub linked, sync to disk
+    if (project.isGithubLinked) {
+      const localPath = path.join(REPOS_DIR, project._id.toString());
+      await syncTreeToDisk(fileTree, localPath).catch(err => {
+        console.error('Failed to sync to disk:', err);
+      });
+    }
 
     res.json({ message: 'File tree updated', fileTree: project.fileTree });
   } catch (error) {

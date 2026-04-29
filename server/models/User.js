@@ -28,6 +28,14 @@ const userSchema = new mongoose.Schema({
     minlength: [6, 'Password must be at least 6 characters'],
     select: false, // Never return password in queries by default
   },
+  githubUsername: {
+    type: String,
+    trim: true,
+  },
+  githubAccessToken: {
+    type: String,
+    select: false, // Keep it secure
+  },
 }, {
   timestamps: true, // Adds createdAt and updatedAt automatically
 });
