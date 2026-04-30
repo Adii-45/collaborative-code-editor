@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Code2, Eye, EyeOff } from 'lucide-react';
+import { Code2, Eye, EyeOff, Github } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Login = () => {
@@ -88,6 +88,27 @@ const Login = () => {
             ) : (
               'Sign in'
             )}
+          </button>
+
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#30363d]"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-[#161b22] text-gray-500">Or continue with</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              console.log('Login: Clicking Continue with GitHub');
+              window.location.href = "http://localhost:8001/api/auth/github";
+            }}
+            className="w-full bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2"
+          >
+            <Github size={20} />
+            Login with GitHub
           </button>
         </form>
 

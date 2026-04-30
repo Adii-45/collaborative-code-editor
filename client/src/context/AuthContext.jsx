@@ -60,6 +60,24 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const githubLogin = async (token) => {
+    localStorage.setItem('token', token);
+    
+    try {
+      // Need to configure the token in the API client header
+      // It might already be handled by an interceptor reading from localStorage
+      const { data } = await api.get('/auth/me');
+      
+      const userData = { ...data, token };
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      localStorage.removeItem('token');
+      throw error;
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -67,7 +85,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, githubLogin, logout }}>
       {children}
     </AuthContext.Provider>
   );
