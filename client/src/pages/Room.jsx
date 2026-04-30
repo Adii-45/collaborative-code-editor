@@ -40,6 +40,21 @@ const Room = () => {
         const { data } = await api.get(`/projects/${projectId}`);
         setFilesTree(data.fileTree);
         setProject(data);
+        
+        // Check if project is already running
+        try {
+          const { data: statusData } = await api.get(`/run/status/${projectId}`);
+          if (statusData.status === 'running') {
+            setIsRunning(true);
+            setShowOutputConsole(true);
+            if (statusData.port) {
+              setPreviewUrl(`http://localhost:${statusData.port}`);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to fetch run status:', err);
+        }
+
         setLoadingProject(false);
       } catch (error) {
         toast.error('Failed to load project');
@@ -244,14 +259,24 @@ const Room = () => {
     <div className="flex flex-col h-full w-full bg-[#1e1e1e]">
       <Navbar
         isRunning={isRunning}
-        toggleRun={() => {
+        toggleRun={async () => {
           if (isRunning) {
-            socket.emit('run:stop', { projectId });
+            await api.post(`/run/stop/${projectId}`);
+            setIsRunning(false);
           } else {
             setRunLogs([]);
             setShowOutputConsole(true);
-            socket.emit('run:start', { projectId });
-            setIsRunning(true); // optimistic
+            try {
+              const { data } = await api.post(`/run/start/${projectId}`);
+              setIsRunning(true);
+              if (data.alreadyRunning) {
+                // Silently re-sync port if already running
+                const { data: statusData } = await api.get(`/run/status/${projectId}`);
+                if (statusData.port) setPreviewUrl(`http://localhost:${statusData.port}`);
+              }
+            } catch (error) {
+              toast.error(error.response?.data?.message || 'Failed to start project');
+            }
           }
         }}
         toggleTerminal={() => setShowOutputConsole(!showOutputConsole)}

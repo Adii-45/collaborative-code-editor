@@ -1,4 +1,4 @@
-import { startProject, stopProject, getStatus } from '../services/runnerService.js';
+import { startProject, stopProject, getProjectStatus } from '../services/runnerService.js';
 
 /**
  * @route   POST /api/run/start/:projectId
@@ -45,6 +45,6 @@ export const stop = async (req, res) => {
  */
 export const status = async (req, res) => {
   const { projectId } = req.params;
-  const state = getStatus(projectId);
-  res.json({ status: state });
+  const state = getProjectStatus(projectId);
+  res.json(state);
 };

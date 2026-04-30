@@ -154,8 +154,10 @@ const installDependencies = (service, io, projectId) => {
  * Start a project with support for multiple services.
  */
 export const startProject = async (projectId, io) => {
-  if (activeProcesses.has(projectId)) {
-    throw new Error('Project is already running');
+  // If already running, return existing state
+  const existing = activeProcesses.get(projectId);
+  if (existing) {
+    return { alreadyRunning: true, services: Object.keys(existing) };
   }
 
   const projectDir = await syncProject(projectId);
@@ -260,8 +262,26 @@ export const stopProject = (projectId) => {
 };
 
 /**
- * Get status of project execution.
+ * Get detailed status of project execution.
  */
+export const getProjectStatus = (projectId) => {
+  const projectState = activeProcesses.get(projectId);
+  if (!projectState) {
+    return { status: 'stopped' };
+  }
+
+  // Find frontend or root port for preview
+  let port = null;
+  if (projectState.frontend?.port) port = projectState.frontend.port;
+  else if (projectState.root?.port) port = projectState.root.port;
+
+  return {
+    status: 'running',
+    services: Object.keys(projectState),
+    port
+  };
+};
+
 export const getStatus = (projectId) => {
   return activeProcesses.has(projectId) ? 'running' : 'stopped';
 };
