@@ -47,11 +47,7 @@ function App() {
             />
             <Route
               path="/github/callback"
-              element={
-                <ProtectedRoute>
-                  <GitHubCallback />
-                </ProtectedRoute>
-              }
+              element={<GitHubCallback />}
             />
 
             {/* Default redirect */}

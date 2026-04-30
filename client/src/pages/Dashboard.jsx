@@ -84,15 +84,7 @@ const Dashboard = () => {
     }
   };
 
-  const handleConnectGitHub = () => {
-    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
-    if (!clientId) {
-      toast.error('GitHub OAuth not configured. Set VITE_GITHUB_CLIENT_ID in client/.env');
-      return;
-    }
-    const redirectUri = `${window.location.origin}/github/callback`;
-    window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo,user&redirect_uri=${redirectUri}`;
-  };
+
 
   const handleImportSubmit = async (e) => {
     e.preventDefault();
@@ -173,13 +165,7 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-8">
           <h2 className="text-xl font-semibold">Your Projects</h2>
           <div className="flex items-center gap-3">
-            <button
-              onClick={handleConnectGitHub}
-              className="flex items-center gap-2 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-            >
-              <Github size={16} />
-              {user?.githubUsername ? `Connected: ${user.githubUsername}` : 'Connect GitHub'}
-            </button>
+
             <button
               onClick={() => setIsImportModalOpen(true)}
               className="flex items-center gap-2 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-gray-300 hover:text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
