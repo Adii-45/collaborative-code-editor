@@ -1,17 +1,18 @@
 /**
- * Socket.io handler for real-time collaboration AND terminal sessions.
+ * Socket.io handler for real-time collaboration and project execution.
  * 
  * Architecture:
  * - Each project is a "room" identified by projectId
  * - Users join/leave rooms when opening/closing projects
  * - File changes are broadcast to all other users in the room
- * - Terminal sessions are per-socket, streamed via node-pty + Docker
+ * - Run/Stop commands trigger project execution via runnerService
  * 
  * FUTURE: Replace raw event broadcasting with Yjs CRDT document sync.
  */
 
 import Project from '../models/Project.js';
 import { syncTreeToDisk } from '../utils/fsUtils.js';
+import { startProject, stopProject } from '../services/runnerService.js';
 import path from 'path';
 import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
@@ -26,9 +27,6 @@ const setupSocket = (io) => {
 
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
-
-    // Track terminal sessions owned by this socket for cleanup
-    socket._terminalSessions = [];
 
     // ═══════════════════════════════════════════════════════════
     // COLLABORATION EVENTS (unchanged from Phase 1)
@@ -101,6 +99,26 @@ const setupSocket = (io) => {
     });
 
     // ═══════════════════════════════════════════════════════════
+    // RUN PROJECT EVENTS
+    // ═══════════════════════════════════════════════════════════
+
+    socket.on('run:start', async ({ projectId }) => {
+      try {
+        const result = await startProject(projectId, io);
+        // Note: runnerService already emits run:started internally
+      } catch (error) {
+        socket.emit('run:error', { message: error.message });
+        socket.emit('run:end', { code: 1 });
+      }
+    });
+
+    socket.on('run:stop', ({ projectId }) => {
+      const stopped = stopProject(projectId);
+      if (!stopped) {
+        socket.emit('run:error', { message: 'No running process to stop' });
+      }
+    });
+
     // ═══════════════════════════════════════════════════════════
     // DISCONNECT
     // ═══════════════════════════════════════════════════════════
@@ -139,26 +157,6 @@ const handleLeaveRoom = (socket, projectId, rooms) => {
         users: Array.from(roomUsers),
       });
     }
-  }
-};
-
-/**
- * Helper: Sync a project's fileTree from MongoDB to the local disk.
- * This ensures the Docker container has the latest files.
- */
-const syncProjectToDisk = async (projectId) => {
-  try {
-    const project = await Project.findById(projectId);
-    if (!project) return;
-
-    const localPath = path.join(REPOS_DIR, projectId.toString());
-    await fs.mkdir(localPath, { recursive: true });
-
-    if (project.fileTree) {
-      await syncTreeToDisk(project.fileTree, localPath);
-    }
-  } catch (error) {
-    console.error(`[Socket] Sync to disk error for ${projectId}:`, error.message);
   }
 };
 
