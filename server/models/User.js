@@ -24,9 +24,24 @@ const userSchema = new mongoose.Schema({
   },
   password: {
     type: String,
-    required: [true, 'Password is required'],
+    required: [
+      function() { return !this.isGithubUser; },
+      'Password is required'
+    ],
     minlength: [6, 'Password must be at least 6 characters'],
     select: false, // Never return password in queries by default
+  },
+  avatar: {
+    type: String,
+    default: '',
+  },
+  githubId: {
+    type: String,
+    sparse: true, // Allow multiple nulls/undefined but unique if present
+  },
+  isGithubUser: {
+    type: Boolean,
+    default: false,
   },
   githubUsername: {
     type: String,
