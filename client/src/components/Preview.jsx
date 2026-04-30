@@ -1,43 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { RefreshCw, Play } from 'lucide-react';
-import { getAllFiles } from '../utils/defaultFiles';
 
-const Preview = ({ filesTree, isRunning }) => {
-  const [srcDoc, setSrcDoc] = useState('');
-
-  const generateSrcDoc = () => {
-    const allFiles = getAllFiles(filesTree);
-    
-    // Find first html, css, js files in the tree
-    const htmlFile = allFiles.find(f => f.name.endsWith('.html'))?.content || '';
-    const cssFile = allFiles.find(f => f.name.endsWith('.css'))?.content || '';
-    const jsFile = allFiles.find(f => f.name.endsWith('.js'))?.content || '';
-
-    return `
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <style>${cssFile}</style>
-        </head>
-        <body>
-          ${htmlFile}
-          <script>${jsFile}</script>
-        </body>
-      </html>
-    `;
-  };
-
-  useEffect(() => {
-    if (isRunning) {
-      setSrcDoc(generateSrcDoc());
-    } else {
-      setSrcDoc('');
-    }
-  }, [isRunning]); // No longer listening to file changes, only start/stop triggers
+const Preview = ({ filesTree, isRunning, previewUrl }) => {
+  const [key, setKey] = React.useState(0);
 
   const handleRefresh = () => {
-    if (isRunning) {
-      setSrcDoc(generateSrcDoc());
+    if (isRunning && previewUrl) {
+      setKey(prev => prev + 1);
     }
   };
 
@@ -51,30 +20,31 @@ const Preview = ({ filesTree, isRunning }) => {
             <div className="w-3 h-3 rounded-full bg-green-400"></div>
           </div>
           <div className="ml-4 bg-[#1e1e1e] border border-[#30363d] rounded text-xs px-3 py-1 text-gray-400 font-mono flex items-center gap-2">
-            <span>localhost:3000</span>
+            <span>{previewUrl ? new URL(previewUrl).host : 'localhost:----'}</span>
           </div>
         </div>
         <button 
           onClick={handleRefresh}
-          className={`text-gray-400 hover:text-white transition-colors ${!isRunning ? 'opacity-50 cursor-not-allowed' : ''}`}
+          className={`text-gray-400 hover:text-white transition-colors ${(!isRunning || !previewUrl) ? 'opacity-50 cursor-not-allowed' : ''}`}
           title="Refresh Preview"
-          disabled={!isRunning}
+          disabled={!isRunning || !previewUrl}
         >
           <RefreshCw size={14} />
         </button>
       </div>
       <div className="flex-1 bg-white relative">
-        {isRunning ? (
+        {isRunning && previewUrl ? (
           <iframe
-            srcDoc={srcDoc}
+            key={key}
+            src={previewUrl}
             title="preview"
-            sandbox="allow-scripts"
-            className="w-full h-full border-none absolute inset-0"
+            sandbox="allow-scripts allow-same-origin allow-forms"
+            className="w-full h-full border-none absolute inset-0 bg-white"
           />
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1e1e1e] text-gray-500">
             <Play size={48} className="mb-4 opacity-20" />
-            <p>Click Run to preview</p>
+            <p>{isRunning ? "Running (No preview available for this project type)" : "Click Run to start project"}</p>
           </div>
         )}
       </div>

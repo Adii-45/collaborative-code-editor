@@ -5,7 +5,7 @@ import Navbar from '../components/Navbar';
 import FileExplorer from '../components/FileExplorer';
 import Editor from '../components/Editor';
 import Preview from '../components/Preview';
-import Terminal from '../components/Terminal';
+import OutputConsole from '../components/OutputConsole';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import socket from '../utils/socket';
@@ -22,7 +22,9 @@ const Room = () => {
   const [activeFile, setActiveFile] = useState(null);
   const [openedFiles, setOpenedFiles] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
-  const [showTerminal, setShowTerminal] = useState(false);
+  const [showOutputConsole, setShowOutputConsole] = useState(false);
+  const [runLogs, setRunLogs] = useState([]);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const [connectedUsers, setConnectedUsers] = useState([]);
   const [loadingProject, setLoadingProject] = useState(true);
 
@@ -82,6 +84,31 @@ const Room = () => {
       toast(`${username} left`, { icon: '👋', duration: 2000 });
     });
 
+    // Listen for run output
+    socket.on('run:log', (entry) => {
+      setRunLogs(prev => [...prev, entry]);
+    });
+
+    socket.on('run:started', ({ type, port }) => {
+      setIsRunning(true);
+      if (port) {
+        setPreviewUrl(`http://localhost:${port}`);
+      } else {
+        setPreviewUrl(null);
+      }
+    });
+
+    socket.on('run:end', () => {
+      setIsRunning(false);
+      setPreviewUrl(null);
+    });
+
+    socket.on('run:error', ({ message }) => {
+      toast.error(message);
+      setIsRunning(false);
+      setPreviewUrl(null);
+    });
+
     // Cleanup on unmount
     return () => {
       socket.emit('leave-room', { projectId });
@@ -89,6 +116,10 @@ const Room = () => {
       socket.off('room-users');
       socket.off('user-joined');
       socket.off('user-left');
+      socket.off('run:log');
+      socket.off('run:started');
+      socket.off('run:end');
+      socket.off('run:error');
       socket.disconnect();
     };
   }, [projectId, user, loadingProject]);
@@ -213,9 +244,18 @@ const Room = () => {
     <div className="flex flex-col h-full w-full bg-[#1e1e1e]">
       <Navbar
         isRunning={isRunning}
-        toggleRun={() => setIsRunning(!isRunning)}
-        toggleTerminal={() => setShowTerminal(!showTerminal)}
-        showTerminal={showTerminal}
+        toggleRun={() => {
+          if (isRunning) {
+            socket.emit('run:stop', { projectId });
+          } else {
+            setRunLogs([]);
+            setShowOutputConsole(true);
+            socket.emit('run:start', { projectId });
+            setIsRunning(true); // optimistic
+          }
+        }}
+        toggleTerminal={() => setShowOutputConsole(!showOutputConsole)}
+        showTerminal={showOutputConsole}
         projectName={project?.name}
         connectedUsers={connectedUsers}
         projectId={projectId}
@@ -238,7 +278,7 @@ const Room = () => {
           <PanelResizeHandle className="w-1 bg-[#30363d] hover:bg-blue-500 transition-colors cursor-col-resize" />
           <Panel defaultSize={50} minSize={30}>
             <PanelGroup direction="vertical">
-              <Panel defaultSize={showTerminal ? 70 : 100}>
+              <Panel defaultSize={showOutputConsole ? 70 : 100}>
                 <Editor
                   filesTree={filesTree}
                   openedFiles={openedFiles}
@@ -248,11 +288,15 @@ const Room = () => {
                   onCodeChange={handleCodeChange}
                 />
               </Panel>
-              {showTerminal && (
+              {showOutputConsole && (
                 <>
                   <PanelResizeHandle className="h-1 bg-[#30363d] hover:bg-blue-500 transition-colors cursor-row-resize z-10" />
                   <Panel defaultSize={30} minSize={15}>
-                    <Terminal projectId={projectId} />
+                    <OutputConsole
+                      logs={runLogs}
+                      onClear={() => setRunLogs([])}
+                      isRunning={isRunning}
+                    />
                   </Panel>
                 </>
               )}
@@ -260,7 +304,7 @@ const Room = () => {
           </Panel>
           <PanelResizeHandle className="w-1 bg-[#30363d] hover:bg-blue-500 transition-colors cursor-col-resize" />
           <Panel defaultSize={30} minSize={20}>
-            <Preview filesTree={filesTree} isRunning={isRunning} />
+            <Preview filesTree={filesTree} isRunning={isRunning} previewUrl={previewUrl} />
           </Panel>
         </PanelGroup>
       </div>

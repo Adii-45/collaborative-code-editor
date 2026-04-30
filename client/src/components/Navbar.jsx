@@ -80,7 +80,7 @@ const Navbar = ({ isRunning, toggleRun, toggleTerminal, showTerminal, projectNam
             }`}
           >
             <TerminalIcon size={16} />
-            <span>Terminal</span>
+            <span>Output Console</span>
           </button>
           <button
             onClick={() => setIsInviteModalOpen(true)}
