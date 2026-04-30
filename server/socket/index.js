@@ -1,15 +1,24 @@
 /**
- * Socket.io handler for real-time collaboration.
+ * Socket.io handler for real-time collaboration AND terminal sessions.
  * 
  * Architecture:
  * - Each project is a "room" identified by projectId
  * - Users join/leave rooms when opening/closing projects
  * - File changes are broadcast to all other users in the room
- * - Cursor positions are broadcast for multi-user awareness
+ * - Terminal sessions are per-socket, streamed via node-pty + Docker
  * 
  * FUTURE: Replace raw event broadcasting with Yjs CRDT document sync.
- * The event names and room structure are designed to make that transition minimal.
  */
+
+import Project from '../models/Project.js';
+import { syncTreeToDisk } from '../utils/fsUtils.js';
+import path from 'path';
+import fs from 'fs/promises';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const REPOS_DIR = path.resolve(__dirname, '..', 'repos');
 
 const setupSocket = (io) => {
   // Track connected users per room for presence
@@ -17,6 +26,13 @@ const setupSocket = (io) => {
 
   io.on('connection', (socket) => {
     console.log(`Socket connected: ${socket.id}`);
+
+    // Track terminal sessions owned by this socket for cleanup
+    socket._terminalSessions = [];
+
+    // ═══════════════════════════════════════════════════════════
+    // COLLABORATION EVENTS (unchanged from Phase 1)
+    // ═══════════════════════════════════════════════════════════
 
     /**
      * join-room: User opens a project
@@ -54,13 +70,8 @@ const setupSocket = (io) => {
     /**
      * file-change: User modified the file tree
      * Payload: { fileTree, changedFileId, changeType }
-     * 
-     * changeType can be: 'content', 'create', 'delete', 'rename', 'move'
-     * This granular event type is designed so that future Yjs integration
-     * can handle each change type differently.
      */
     socket.on('file-change', ({ projectId, fileTree, changedFileId, changeType }) => {
-      // Broadcast to all OTHER users in the room (not back to sender)
       socket.to(projectId).emit('file-change', {
         fileTree,
         changedFileId,
@@ -72,7 +83,6 @@ const setupSocket = (io) => {
 
     /**
      * cursor-move: User moved their cursor in the editor
-     * Payload: { projectId, fileId, position: { lineNumber, column } }
      */
     socket.on('cursor-move', ({ projectId, fileId, position }) => {
       socket.to(projectId).emit('cursor-move', {
@@ -90,10 +100,13 @@ const setupSocket = (io) => {
       handleLeaveRoom(socket, projectId, rooms);
     });
 
-    /**
-     * disconnect: Clean up when socket disconnects
-     */
+    // ═══════════════════════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
+    // DISCONNECT
+    // ═══════════════════════════════════════════════════════════
+
     socket.on('disconnect', () => {
+      // Clean up room presence
       if (socket.projectId) {
         handleLeaveRoom(socket, socket.projectId, rooms);
       }
@@ -110,7 +123,6 @@ const handleLeaveRoom = (socket, projectId, rooms) => {
 
   if (rooms.has(projectId)) {
     const roomUsers = rooms.get(projectId);
-    // Remove this socket from the room set
     for (const user of roomUsers) {
       if (user.socketId === socket.id) {
         roomUsers.delete(user);
@@ -118,17 +130,35 @@ const handleLeaveRoom = (socket, projectId, rooms) => {
       }
     }
 
-    // Clean up empty rooms
     if (roomUsers.size === 0) {
       rooms.delete(projectId);
     } else {
-      // Notify remaining users
       socket.to(projectId).emit('user-left', {
         userId: socket.userId,
         username: socket.username,
         users: Array.from(roomUsers),
       });
     }
+  }
+};
+
+/**
+ * Helper: Sync a project's fileTree from MongoDB to the local disk.
+ * This ensures the Docker container has the latest files.
+ */
+const syncProjectToDisk = async (projectId) => {
+  try {
+    const project = await Project.findById(projectId);
+    if (!project) return;
+
+    const localPath = path.join(REPOS_DIR, projectId.toString());
+    await fs.mkdir(localPath, { recursive: true });
+
+    if (project.fileTree) {
+      await syncTreeToDisk(project.fileTree, localPath);
+    }
+  } catch (error) {
+    console.error(`[Socket] Sync to disk error for ${projectId}:`, error.message);
   }
 };
 

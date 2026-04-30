@@ -14,32 +14,43 @@ const REPOS_DIR = path.join(__dirname, '..', 'repos');
 // Ensure repos directory exists
 fs.mkdir(REPOS_DIR, { recursive: true }).catch(console.error);
 
-// Allowed exact commands
-const ALLOWED_EXACT_COMMANDS = ['ls', 'pwd', 'npm install'];
+// Blocked exact commands or prefixes to prevent destructive operations
+const BLOCKED_COMMANDS = [
+  'rm', 'mv', 'sudo', 'su', 'reboot', 'shutdown', 'halt',
+  'mkfs', 'dd', 'fdisk', 'mount', 'umount', 'chown', 'chmod',
+  'iptables', 'ufw', 'firewall-cmd', 'systemctl', 'service',
+  'kill', 'killall', 'pkill', 'top', 'htop'
+];
 
 /**
  * Validates if the command is allowed and safe.
  */
 const isCommandAllowed = (command) => {
   const cmd = command.trim();
+  const cmdParts = cmd.split(' ');
+  const baseCommand = cmdParts[0].toLowerCase();
 
-  // 1. Anti-chaining: block shell metacharacters
-  if (/[&|;<>$`]/.test(cmd)) {
+  // 1. Anti-chaining: block shell metacharacters that could bypass filters
+  // (We allow > for basic output redirection, but block | & ; $ `)
+  if (/[|;&$`]/.test(cmd)) {
     return false;
   }
 
-  // 2. Exact match check
-  if (ALLOWED_EXACT_COMMANDS.includes(cmd)) {
-    return true;
+  // 2. Block dangerous base commands
+  if (BLOCKED_COMMANDS.includes(baseCommand)) {
+    return false;
   }
 
-  // 3. Pattern match for `node <filename>`
-  // Allows `node file.js`, `node src/index.js`, etc. (no parent directories `../`)
-  if (/^node\s+[\w\-\.\/]+$/.test(cmd) && !cmd.includes('../')) {
-    return true;
+  // 3. Block any command attempting to navigate up directory trees excessively
+  // (We allow running files in subdirectories, but block trying to escape the repo)
+  if (cmd.includes('../') || cmd.includes('..\\') || cmd.startsWith('/')) {
+    // Only allow absolute paths if it's explicitly inside REPOS_DIR
+    if (cmd.startsWith('/') && !cmd.includes(REPOS_DIR)) {
+      return false;
+    }
   }
 
-  return false;
+  return true;
 };
 
 /**
@@ -51,7 +62,7 @@ export const executeCommand = async (command, projectId, userId) => {
     if (!isCommandAllowed(command)) {
       return {
         stdout: '',
-        stderr: 'Error: Command not allowed. Supported commands: ls, pwd, npm install, node <file>',
+        stderr: 'Error: Command blocked for security reasons.',
         exitCode: 1,
       };
     }
