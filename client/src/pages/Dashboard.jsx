@@ -21,7 +21,6 @@ const Dashboard = () => {
   // GitHub Import state
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [importRepoUrl, setImportRepoUrl] = useState('');
-  const [importProjectId, setImportProjectId] = useState('');
   const [isImporting, setIsImporting] = useState(false);
 
   const { user, logout } = useAuth();
@@ -86,30 +85,31 @@ const Dashboard = () => {
   };
 
   const handleConnectGitHub = () => {
-    // Redirect to GitHub OAuth
-    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID || 'dummy_client_id'; // Fallback for dev if not set
+    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
+    if (!clientId) {
+      toast.error('GitHub OAuth not configured. Set VITE_GITHUB_CLIENT_ID in client/.env');
+      return;
+    }
     const redirectUri = `${window.location.origin}/github/callback`;
     window.location.href = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo,user&redirect_uri=${redirectUri}`;
   };
 
   const handleImportSubmit = async (e) => {
     e.preventDefault();
-    if (!importRepoUrl || !importProjectId) {
-      toast.error('Repo URL and Project selection required');
+    if (!importRepoUrl.trim()) {
+      toast.error('Please enter a repository URL');
       return;
     }
 
     setIsImporting(true);
     try {
-      await api.post('/github/import', {
-        projectId: importProjectId,
-        repoUrl: importRepoUrl
+      const { data } = await api.post('/github/import-url', {
+        repoUrl: importRepoUrl.trim()
       });
-      toast.success('Repository imported successfully!');
+      toast.success(`Project "${data.projectName}" created!`);
       setIsImportModalOpen(false);
       setImportRepoUrl('');
-      setImportProjectId('');
-      fetchProjects();
+      navigate(`/editor/${data.projectId}`);
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to import repository');
     } finally {
@@ -232,45 +232,37 @@ const Dashboard = () => {
               </h3>
               <form onSubmit={handleImportSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-sm text-gray-400 mb-1">Repository URL</label>
+                  <label className="block text-sm text-gray-400 mb-1">GitHub Repository URL</label>
                   <input
                     type="url"
                     required
+                    autoFocus
                     value={importRepoUrl}
                     onChange={(e) => setImportRepoUrl(e.target.value)}
                     placeholder="https://github.com/user/repo"
                     className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm text-gray-400 mb-1">Target Project</label>
-                  <select
-                    required
-                    value={importProjectId}
-                    onChange={(e) => setImportProjectId(e.target.value)}
-                    className="w-full bg-[#0d1117] border border-[#30363d] rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-blue-500"
-                  >
-                    <option value="">Select a project to import into...</option>
-                    {myOwnedProjects.map(p => (
-                      <option key={p._id} value={p._id}>{p.name}</option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-yellow-500 mt-1">Warning: Importing will overwrite the selected project's files.</p>
+                  <p className="text-xs text-gray-500 mt-1.5">A new project will be created automatically from the repo name.</p>
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => setIsImportModalOpen(false)}
+                    onClick={() => { setIsImportModalOpen(false); setImportRepoUrl(''); }}
                     className="flex-1 py-2 rounded-lg font-medium text-sm text-gray-300 hover:text-white bg-[#21262d] hover:bg-[#30363d] transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    disabled={isImporting || !importRepoUrl || !importProjectId}
+                    disabled={isImporting || !importRepoUrl.trim()}
                     className="flex-1 py-2 rounded-lg font-medium text-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
                   >
-                    {isImporting ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div> : 'Import'}
+                    {isImporting ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Importing...
+                      </>
+                    ) : 'Import'}
                   </button>
                 </div>
               </form>
