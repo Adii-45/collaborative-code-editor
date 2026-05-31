@@ -6,11 +6,26 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
+import TeamWorkspace from './pages/TeamWorkspace';
 import Room from './pages/Room';
+import Integrations from './pages/Integrations';
 import AcceptInvite from './pages/AcceptInvite';
 import GitHubCallback from './pages/GitHubCallback';
+import CommandPalette from './components/CommandPalette';
 
 function App() {
+  const [isCommandOpen, setIsCommandOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsCommandOpen(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
   return (
     <AuthProvider>
       <BrowserRouter>
@@ -38,6 +53,22 @@ function App() {
               }
             />
             <Route
+              path="/teams"
+              element={
+                <ProtectedRoute>
+                  <TeamWorkspace />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/integrations"
+              element={
+                <ProtectedRoute>
+                  <Integrations />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/invite/:token"
               element={
                 <ProtectedRoute>
@@ -55,6 +86,8 @@ function App() {
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </div>
+
+        <CommandPalette isOpen={isCommandOpen} onClose={() => setIsCommandOpen(false)} />
 
         {/* Toast notifications */}
         <Toaster

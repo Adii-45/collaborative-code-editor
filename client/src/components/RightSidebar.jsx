@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MoreHorizontal, Bot, Send } from 'lucide-react';
+import { MoreHorizontal, Bot, Send, Check } from 'lucide-react';
 import Preview from './Preview';
 
 const RightSidebar = ({ connectedUsers, filesTree, isRunning, previewUrl }) => {
