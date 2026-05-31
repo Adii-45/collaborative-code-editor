@@ -27,8 +27,8 @@ const Editor = ({ filesTree, openedFiles, activeFile, setActiveFile, closeFile, 
   const activeContent = activeNode ? activeNode.content : '';
 
   return (
-    <div className="h-full w-full flex flex-col bg-[#1e1e1e] border-r border-[#30363d] overflow-hidden">
-      <div className="flex bg-[#252526] text-gray-300 text-sm overflow-x-auto scrollbar-hide border-b border-[#30363d] shrink-0">
+    <div className="h-full w-full flex flex-col bg-[#0A0D14] border-r border-[#1E232B] overflow-hidden">
+      <div className="flex bg-[#11161D] text-gray-300 text-sm overflow-x-auto scrollbar-hide border-b border-[#1E232B] shrink-0">
         {openedFiles.map(filePath => {
           const node = findNode(filesTree, filePath);
           const name = node ? node.name : filePath.split('/').pop();
@@ -37,15 +37,15 @@ const Editor = ({ filesTree, openedFiles, activeFile, setActiveFile, closeFile, 
           return (
             <div 
               key={filePath}
-              className={`flex items-center gap-2 px-3 py-2 cursor-pointer border-r border-[#30363d] min-w-max group ${
-                isActive ? 'bg-[#1e1e1e] border-t-2 border-t-blue-500 text-white' : 'bg-[#2d2d2d] border-t-2 border-t-transparent hover:bg-[#2a2d2e]'
+              className={`flex items-center gap-2 px-3 py-2 cursor-pointer border-r border-[#1E232B] min-w-max group ${
+                isActive ? 'bg-[#0A0D14] border-t-2 border-t-blue-500 text-white' : 'bg-[#11161D] border-t-2 border-t-transparent hover:bg-[#1E232B]'
               }`}
               onClick={() => setActiveFile(filePath)}
             >
               <span>{name}</span>
               <button 
                 onClick={(e) => { e.stopPropagation(); closeFile(filePath); }}
-                className={`p-0.5 rounded hover:bg-[#3c3c3c] ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                className={`p-0.5 rounded hover:bg-[#30363D] ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
               >
                 <X size={14} />
               </button>

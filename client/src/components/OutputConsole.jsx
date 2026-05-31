@@ -29,21 +29,28 @@ const OutputConsole = ({ logs = [], onClear, isRunning }) => {
   };
 
   return (
-    <div className="h-full w-full bg-[#1e1e1e] overflow-hidden flex flex-col border-t border-[#30363d]">
+    <div className="h-full w-full bg-[#11161D] overflow-hidden flex flex-col border-t border-[#1E232B]">
       {/* Header bar */}
-      <div className="flex items-center justify-between bg-[#252526] text-gray-400 text-xs border-b border-[#30363d] shrink-0 px-3 py-1.5">
-        <div className="flex items-center gap-2 font-semibold uppercase tracking-wider">
-          <TerminalIcon size={14} />
-          <span>Output Console</span>
+      <div className="flex items-center justify-between bg-[#11161D] text-gray-400 text-xs border-b border-[#1E232B] shrink-0 pt-2 px-2">
+        <div className="flex items-center gap-4">
+          <button className="px-2 py-1.5 border-b-2 border-transparent hover:text-gray-200 uppercase tracking-wider font-medium text-[10px]">
+            Terminal
+          </button>
+          <button className="px-2 py-1.5 border-b-2 border-blue-500 text-blue-400 uppercase tracking-wider font-medium text-[10px]">
+            Output
+          </button>
+          <button className="px-2 py-1.5 border-b-2 border-transparent hover:text-gray-200 uppercase tracking-wider font-medium text-[10px]">
+            Problems (0)
+          </button>
           {isRunning && (
-            <span className="ml-2 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-green-600/20 text-green-400 border border-green-600/30 rounded">
+            <span className="ml-2 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-green-600/20 text-green-400 border border-green-600/30 rounded">
               Running
             </span>
           )}
         </div>
         <button
           onClick={onClear}
-          className="p-1 hover:bg-[#3c3c3c] rounded transition-colors"
+          className="p-1.5 hover:bg-[#1E232B] rounded transition-colors mb-1"
           title="Clear Output"
         >
           <Trash2 size={13} />

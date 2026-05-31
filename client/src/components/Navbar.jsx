@@ -1,108 +1,123 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Play, Square, UserPlus, Code2, Terminal as TerminalIcon, ArrowLeft, LogOut, Users, Github, ArrowUpRight } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { Rocket, Bell, Settings, ChevronRight, Folder, FileCode2, Play, Square } from 'lucide-react';
 import InviteModal from './InviteModal';
 import CommitModal from './CommitModal';
 
-const Navbar = ({ isRunning, toggleRun, toggleTerminal, showTerminal, projectName, connectedUsers, projectId, project }) => {
-  const { user, logout } = useAuth();
+const Navbar = ({ isRunning, toggleRun, toggleTerminal, showTerminal, projectName, connectedUsers, projectId, project, activeFile, filesTree }) => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
   const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  // Helper to find path to active file
+  const getFilePath = (tree, targetId, path = []) => {
+    if (!tree) return null;
+    for (const node of tree) {
+      if (node.id === targetId) return [...path, node];
+      if (node.children) {
+        const found = getFilePath(node.children, targetId, [...path, node]);
+        if (found) return found;
+      }
+    }
+    return null;
   };
+
+  const breadcrumbs = getFilePath(filesTree, activeFile) || [];
 
   return (
     <>
-      <nav className="h-14 bg-[#161b22] border-b border-[#30363d] flex items-center justify-between px-4 shrink-0">
-        {/* Left: Back + Logo + Project Name */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={() => navigate('/dashboard')}
-            className="text-gray-400 hover:text-white transition-colors p-1"
-            title="Back to dashboard"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <div className="bg-blue-600 p-1.5 rounded-md">
-            {project?.isGithubLinked ? (
-              <Github size={18} className="text-white" />
-            ) : (
-              <Code2 size={18} className="text-white" />
-            )}
+      <nav className="h-12 bg-[#0A0D14] border-b border-[#1E232B] flex items-center justify-between px-4 shrink-0 font-sans">
+        
+        {/* Left: Logo */}
+        <div 
+          className="flex items-center gap-2 cursor-pointer w-48"
+          onClick={() => navigate('/dashboard')}
+        >
+          <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+            <span className="text-white font-bold text-xs">N</span>
           </div>
           <span className="font-semibold text-sm tracking-wide text-gray-200">
-            {projectName || 'Untitled Project'}
+            Nexus IDE
           </span>
-          {/* Connected users indicator */}
-          {connectedUsers?.length > 1 && (
-            <div className="flex items-center gap-1.5 ml-2 bg-[#21262d] border border-[#30363d] px-2.5 py-1 rounded-full">
-              <Users size={12} className="text-green-400" />
-              <span className="text-xs text-gray-300">{connectedUsers.length} online</span>
-            </div>
-          )}
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-3">
-          {project?.isGithubLinked && (
-            <button
-              onClick={() => setIsCommitModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#21262d] hover:bg-[#30363d] border border-[#30363d] text-gray-300 hover:text-white text-sm font-medium rounded-md transition-colors"
-            >
-              <ArrowUpRight size={16} className="text-green-400" />
-              <span>Commit & Push</span>
-            </button>
+        {/* Middle: Breadcrumbs */}
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex items-center text-xs text-gray-400 font-medium">
+            {breadcrumbs.length > 0 ? (
+              breadcrumbs.map((node, index) => (
+                <React.Fragment key={node.id}>
+                  {index > 0 && <ChevronRight size={14} className="mx-1 text-gray-600" />}
+                  <div className={`flex items-center gap-1.5 ${index === breadcrumbs.length - 1 ? 'text-gray-200' : 'hover:text-gray-300 cursor-pointer'}`}>
+                    {node.type === 'folder' ? <Folder size={14} /> : <FileCode2 size={14} />}
+                    <span>{node.name}</span>
+                  </div>
+                </React.Fragment>
+              ))
+            ) : (
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <Folder size={14} />
+                <span>{projectName || 'Workspace'}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Actions & Users */}
+        <div className="flex items-center justify-end gap-4 w-64">
+          
+          {/* Connected Users */}
+          {connectedUsers && connectedUsers.length > 0 && (
+            <div className="flex -space-x-1.5">
+              {connectedUsers.slice(0, 3).map((u, i) => {
+                const initials = u.username ? u.username.charAt(0).toUpperCase() : 'U';
+                return (
+                  <div 
+                    key={i} 
+                    className="w-6 h-6 rounded-full bg-blue-900 border-2 border-[#0A0D14] flex items-center justify-center text-[10px] font-bold text-blue-200 z-10"
+                    title={u.username}
+                  >
+                    {initials}
+                  </div>
+                );
+              })}
+              {connectedUsers.length > 3 && (
+                <div className="w-6 h-6 rounded-full bg-[#1E232B] border-2 border-[#0A0D14] flex items-center justify-center text-[10px] font-bold text-gray-400 z-0">
+                  +{connectedUsers.length - 3}
+                </div>
+              )}
+            </div>
           )}
 
+          {/* Run/Deploy Button */}
           <button
             onClick={toggleRun}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-sm font-medium rounded-md transition-colors ${
-              isRunning
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-green-600 hover:bg-green-700'
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-medium rounded-md transition-colors ${
+              isRunning ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'
             }`}
           >
-            {isRunning ? <Square size={14} className="fill-current" /> : <Play size={16} />}
-            <span>{isRunning ? 'Stop' : 'Run'}</span>
-          </button>
-          <button
-            onClick={toggleTerminal}
-            className={`flex items-center gap-1.5 px-3 py-1.5 border text-sm font-medium rounded-md transition-colors ${
-              showTerminal
-                ? 'bg-[#30363d] border-[#30363d] text-white'
-                : 'bg-[#21262d] hover:bg-[#30363d] border-[#30363d] text-gray-300 hover:text-white'
-            }`}
-          >
-            <TerminalIcon size={16} />
-            <span>Output Console</span>
-          </button>
-          <button
-            onClick={() => setIsInviteModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
-          >
-            <UserPlus size={16} />
-            <span>Invite</span>
+            {isRunning ? <Square size={14} className="fill-current" /> : <Rocket size={14} />}
+            <span>{isRunning ? 'Stop' : 'Deploy'}</span>
           </button>
 
-          {/* User & Logout */}
-          <div className="flex items-center gap-2 ml-2 pl-3 border-l border-[#30363d]">
-            <div className="w-7 h-7 rounded-full bg-[#0d1117] border border-[#30363d] flex items-center justify-center text-xs font-bold text-gray-300">
-              {user?.username?.charAt(0).toUpperCase()}
-            </div>
-            <button
-              onClick={handleLogout}
-              className="text-gray-400 hover:text-white transition-colors p-1"
-              title="Logout"
-            >
-              <LogOut size={16} />
+          {/* Icons */}
+          <div className="flex items-center gap-1 text-gray-400">
+            <button className="p-1.5 hover:text-white hover:bg-[#1E232B] rounded-md transition-colors relative">
+              <Bell size={16} />
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-blue-500 rounded-full border border-[#0A0D14]"></span>
+            </button>
+            <button className="p-1.5 hover:text-white hover:bg-[#1E232B] rounded-md transition-colors">
+              <Settings size={16} />
             </button>
           </div>
+          
+          {/* User Avatar */}
+          <button className="w-6 h-6 rounded-full bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white ml-1">
+            {user?.username?.charAt(0).toUpperCase() || 'U'}
+          </button>
+
         </div>
       </nav>
 

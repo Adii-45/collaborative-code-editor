@@ -127,8 +127,8 @@ const FileNode = ({
         style={{ paddingLeft: `${level * 12 + 4}px` }}
         className={`w-full flex items-center justify-between group py-1 text-sm transition-colors cursor-pointer ${
           activeFile === node.id 
-            ? 'bg-[#37373d] text-white' 
-            : isOver ? 'bg-[#2a2d2e] ring-1 ring-blue-500' : 'text-gray-400 hover:bg-[#2a2d2e] hover:text-gray-200'
+            ? 'bg-[#1E232B] text-blue-400' 
+            : isOver ? 'bg-[#1E232B] ring-1 ring-blue-500' : 'text-gray-400 hover:bg-[#1E232B] hover:text-gray-200'
         }`}
       >
         <div className="flex items-center gap-1.5 flex-1 overflow-hidden">
@@ -281,7 +281,7 @@ const FileExplorer = ({ filesTree, activeFile, setActiveFile, openFile, onCreate
 
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div className="h-full w-full bg-[#181818] flex flex-col select-none">
+      <div className="h-full w-full bg-transparent flex flex-col select-none">
         <div className="px-4 py-3 flex items-center justify-between shrink-0">
           <h2 className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Explorer</h2>
           <div className="flex items-center gap-2 text-gray-400">
