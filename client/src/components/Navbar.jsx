@@ -12,12 +12,18 @@ const Navbar = ({ isRunning, toggleRun, toggleTerminal, showTerminal, projectNam
   const [isCommitModalOpen, setIsCommitModalOpen] = useState(false);
 
   // Helper to find path to active file
-  const getFilePath = (tree, targetId, path = []) => {
-    if (!tree) return null;
-    for (const node of tree) {
-      if (node.id === targetId) return [...path, node];
-      if (node.children) {
-        const found = getFilePath(node.children, targetId, [...path, node]);
+  const getFilePath = (node, targetId, path = []) => {
+    if (!node) return null;
+    
+    // Skip adding the root node itself to breadcrumbs to keep UI clean,
+    // unless you want "root > src > App.js". Let's skip it if name is "root".
+    const currentPath = node.name === 'root' ? path : [...path, node];
+
+    if (node.id === targetId) return currentPath;
+    
+    if (node.children) {
+      for (const child of node.children) {
+        const found = getFilePath(child, targetId, currentPath);
         if (found) return found;
       }
     }

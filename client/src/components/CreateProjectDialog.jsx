@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Search, Github, FileCode2, Layout, Database } from 'lucide-react';
+import { X, Search, Github, FileCode2, Layout, Database, Code2 } from 'lucide-react';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';

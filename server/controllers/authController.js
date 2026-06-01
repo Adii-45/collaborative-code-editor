@@ -92,9 +92,79 @@ export const getMe = async (req, res) => {
       _id: req.user._id,
       username: req.user.username,
       email: req.user.email,
+      workspaceName: req.user.workspaceName || `${req.user.username}'s Workspace`,
+      workspaceDescription: req.user.workspaceDescription || `Personal workspace for ${req.user.username}.`,
       createdAt: req.user.createdAt,
+      githubId: req.user.githubId,
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+/**
+ * @route   PUT /api/auth/workspace
+ * @desc    Update workspace settings
+ * @access  Private
+ */
+export const updateWorkspaceSettings = async (req, res) => {
+  try {
+    const { workspaceName, workspaceDescription } = req.body;
+    
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (workspaceName !== undefined) user.workspaceName = workspaceName;
+    if (workspaceDescription !== undefined) user.workspaceDescription = workspaceDescription;
+
+    await user.save();
+    
+    res.json({
+      workspaceName: user.workspaceName,
+      workspaceDescription: user.workspaceDescription
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error updating workspace settings' });
+  }
+};
+
+/**
+ * @route   PUT /api/auth/password
+ * @desc    Update password
+ * @access  Private
+ */
+export const updatePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Please provide both current and new passwords' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    const user = await User.findById(req.user._id).select('+password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    if (user.isGithubUser && !user.password) {
+      return res.status(400).json({ message: 'GitHub users cannot change password' });
+    }
+
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Incorrect current password' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+    
+    res.json({ message: 'Password updated successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error updating password' });
   }
 };
