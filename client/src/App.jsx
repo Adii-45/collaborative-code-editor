@@ -8,7 +8,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import TeamWorkspace from './pages/TeamWorkspace';
 import Room from './pages/Room';
-import Integrations from './pages/Integrations';
+import Settings from './pages/Settings';
 import AcceptInvite from './pages/AcceptInvite';
 import GitHubCallback from './pages/GitHubCallback';
 import CommandPalette from './components/CommandPalette';
@@ -61,10 +61,10 @@ function App() {
               }
             />
             <Route
-              path="/settings/integrations"
+              path="/settings"
               element={
                 <ProtectedRoute>
-                  <Integrations />
+                  <Settings />
                 </ProtectedRoute>
               }
             />
