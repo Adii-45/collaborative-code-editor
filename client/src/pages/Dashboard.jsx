@@ -12,6 +12,7 @@ import { Plus, Github } from 'lucide-react';
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Modals state
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -26,6 +27,7 @@ const Dashboard = () => {
   }, []);
 
   const fetchProjects = async () => {
+    setLoading(true);
     try {
       const { data } = await api.get('/projects');
       setProjects(data);
@@ -41,8 +43,12 @@ const Dashboard = () => {
     setInviteModalOpen(true);
   };
 
+  const filteredProjects = projects.filter(p => 
+    p.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <DashboardLayout>
+    <DashboardLayout onSearch={setSearchQuery}>
       {/* Page Header */}
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold text-white tracking-tight">
@@ -70,8 +76,9 @@ const Dashboard = () => {
 
       {/* Projects Grid */}
       {loading ? (
-        <div className="flex items-center justify-center py-32">
+        <div className="flex flex-col items-center justify-center py-32 space-y-4">
           <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-sm text-gray-400">Loading projects...</p>
         </div>
       ) : projects.length === 0 ? (
         <div className="text-center py-32 bg-[#11161D] rounded-2xl border border-[#1E232B]">
@@ -85,9 +92,14 @@ const Dashboard = () => {
             Create Project
           </button>
         </div>
+      ) : filteredProjects.length === 0 ? (
+        <div className="text-center py-32 bg-[#11161D] rounded-2xl border border-[#1E232B]">
+          <h3 className="text-gray-200 text-lg font-semibold mb-2">No results found</h3>
+          <p className="text-gray-500 text-sm">No projects match your search query "{searchQuery}"</p>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {projects.map(project => {
+          {filteredProjects.map(project => {
             const isOwner = project.owner._id === user._id || project.owner === user._id;
             
             let myRole = 'Owner';

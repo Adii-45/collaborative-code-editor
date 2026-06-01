@@ -51,6 +51,14 @@ const userSchema = new mongoose.Schema({
     type: String,
     select: false, // Keep it secure
   },
+  workspaceName: {
+    type: String,
+    trim: true,
+  },
+  workspaceDescription: {
+    type: String,
+    trim: true,
+  },
 }, {
   timestamps: true, // Adds createdAt and updatedAt automatically
 });

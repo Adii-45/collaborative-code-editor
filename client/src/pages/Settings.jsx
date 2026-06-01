@@ -56,12 +56,66 @@ const Settings = () => {
 
   const [githubLinked, setGithubLinked] = useState(false);
 
+  // Workspace State
+  const [workspaceName, setWorkspaceName] = useState(user?.workspaceName || `${user?.username || 'User'}'s Workspace`);
+  const [workspaceDescription, setWorkspaceDescription] = useState(user?.workspaceDescription || `Personal workspace for ${user?.username || 'User'}.`);
+  const [isSavingWorkspace, setIsSavingWorkspace] = useState(false);
+
+  // Password State
+  const [isEditingPassword, setIsEditingPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
+
   useEffect(() => {
     // Check if user has linked github (real backend check)
     api.get('/auth/me')
-      .then(res => setGithubLinked(!!res.data.githubId))
+      .then(res => {
+        setGithubLinked(!!res.data.githubId);
+        if (res.data.workspaceName) setWorkspaceName(res.data.workspaceName);
+        if (res.data.workspaceDescription) setWorkspaceDescription(res.data.workspaceDescription);
+      })
       .catch(err => console.error(err));
   }, []);
+
+  const handleSaveWorkspace = async () => {
+    setIsSavingWorkspace(true);
+    try {
+      const { data } = await api.put('/auth/workspace', {
+        workspaceName,
+        workspaceDescription
+      });
+      setWorkspaceName(data.workspaceName);
+      setWorkspaceDescription(data.workspaceDescription);
+      toast.success('Workspace settings updated');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update workspace');
+    } finally {
+      setIsSavingWorkspace(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!currentPassword || !newPassword) {
+      return toast.error('Please enter both passwords');
+    }
+    if (newPassword.length < 6) {
+      return toast.error('New password must be at least 6 characters');
+    }
+    
+    setIsSavingPassword(true);
+    try {
+      await api.put('/auth/password', { currentPassword, newPassword });
+      toast.success('Password updated successfully');
+      setIsEditingPassword(false);
+      setCurrentPassword('');
+      setNewPassword('');
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update password');
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
 
   const handleToggleVercel = () => {
     const newVal = !vercelConnected;
@@ -122,39 +176,47 @@ const Settings = () => {
                     <label className="block text-sm font-semibold text-gray-300 mb-2">Workspace Name</label>
                     <input 
                       type="text" 
-                      defaultValue="Acme Corp."
+                      value={workspaceName}
+                      onChange={(e) => setWorkspaceName(e.target.value)}
                       className="w-full bg-[#0A0D14] border border-[#1E232B] rounded-lg px-4 py-2 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-300 mb-2">Workspace Description</label>
                     <textarea 
-                      defaultValue="Main engineering workspace for Acme."
+                      value={workspaceDescription}
+                      onChange={(e) => setWorkspaceDescription(e.target.value)}
                       className="w-full h-24 bg-[#0A0D14] border border-[#1E232B] rounded-lg px-4 py-3 text-sm text-white placeholder:text-gray-600 focus:outline-none focus:border-blue-500 resize-none transition-colors"
                     />
                   </div>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between opacity-50">
                     <div>
                       <h4 className="text-sm font-semibold text-gray-300">Public Visibility</h4>
                       <p className="text-xs text-gray-500 mt-1">Allow anyone with the link to view this workspace.</p>
                     </div>
-                    <button className="w-10 h-6 rounded-full bg-[#30363D] relative transition-colors">
+                    <button disabled className="w-10 h-6 rounded-full bg-[#30363D] relative transition-colors cursor-not-allowed">
                       <div className="w-4 h-4 bg-gray-400 rounded-full absolute top-1 left-1"></div>
                     </button>
                   </div>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-semibold text-gray-300 mb-2">Workspace Logo</label>
-                  <div className="border-2 border-dashed border-[#1E232B] rounded-xl p-8 flex flex-col items-center justify-center text-center bg-[#0A0D14] hover:bg-[#11161D] transition-colors cursor-pointer">
-                    <div className="w-16 h-16 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl font-bold mb-4">
-                      A
+                  <div className="opacity-70">
+                    <label className="block text-sm font-semibold text-gray-300 mb-2">Workspace Logo</label>
+                    <div className="border-2 border-dashed border-[#1E232B] rounded-xl p-8 flex flex-col items-center justify-center text-center bg-[#0A0D14] transition-colors cursor-not-allowed">
+                      <div className="w-16 h-16 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-2xl font-bold mb-4">
+                        {user?.username?.charAt(0).toUpperCase() || 'U'}
+                      </div>
+                      <p className="text-sm text-gray-300 font-medium mb-1">Custom logos unavailable</p>
+                      <p className="text-xs text-gray-500">Feature requires premium plan</p>
                     </div>
-                    <p className="text-sm text-gray-300 font-medium mb-1">Click to upload logo</p>
-                    <p className="text-xs text-gray-500">SVG, PNG, JPG (max. 800x400px)</p>
                   </div>
-                  <button className="mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors">
-                    Save Changes
+                  <button 
+                    onClick={handleSaveWorkspace}
+                    disabled={isSavingWorkspace}
+                    className="mt-6 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    {isSavingWorkspace ? 'Saving...' : 'Save Changes'}
                   </button>
                 </div>
               </div>
@@ -171,38 +233,83 @@ const Settings = () => {
             </div>
             
             <div className="bg-[#11161D] border border-[#1E232B] rounded-2xl shadow-sm overflow-hidden">
-              <div className="p-6 border-b border-[#1E232B] flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
-                    <Key size={16} className="text-gray-400" /> Change Password
-                  </h3>
-                  <p className="text-xs text-gray-400">Update your account password. We recommend a strong, unique password.</p>
+              <div className="p-6 border-b border-[#1E232B] flex flex-col gap-4">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
+                      <Key size={16} className="text-gray-400" /> Change Password
+                    </h3>
+                    <p className="text-xs text-gray-400">Update your account password. We recommend a strong, unique password.</p>
+                  </div>
+                  {!isEditingPassword && (
+                    <button 
+                      onClick={() => setIsEditingPassword(true)}
+                      className="px-4 py-2 bg-[#1E232B] hover:bg-[#30363D] border border-[#30363D] text-gray-200 text-sm font-medium rounded-lg transition-colors shrink-0"
+                    >
+                      Update Password
+                    </button>
+                  )}
                 </div>
-                <button className="px-4 py-2 bg-[#1E232B] hover:bg-[#30363D] border border-[#30363D] text-gray-200 text-sm font-medium rounded-lg transition-colors shrink-0">
-                  Update Password
-                </button>
+                
+                {isEditingPassword && (
+                  <div className="mt-2 p-4 bg-[#0A0D14] border border-[#1E232B] rounded-xl flex flex-col md:flex-row gap-4 items-end">
+                    <div className="flex-1 w-full">
+                      <label className="block text-xs font-semibold text-gray-400 mb-1.5">Current Password</label>
+                      <input 
+                        type="password" 
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        className="w-full bg-[#11161D] border border-[#1E232B] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <div className="flex-1 w-full">
+                      <label className="block text-xs font-semibold text-gray-400 mb-1.5">New Password</label>
+                      <input 
+                        type="password" 
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className="w-full bg-[#11161D] border border-[#1E232B] rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 w-full md:w-auto">
+                      <button 
+                        onClick={() => { setIsEditingPassword(false); setCurrentPassword(''); setNewPassword(''); }}
+                        className="px-4 py-2 bg-transparent text-gray-400 hover:text-white text-sm font-medium rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button 
+                        onClick={handleUpdatePassword}
+                        disabled={isSavingPassword}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-sm font-medium rounded-lg transition-colors"
+                      >
+                        {isSavingPassword ? 'Saving...' : 'Save'}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="p-6 border-b border-[#1E232B] flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
+                <div className="opacity-70">
                   <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
                     <MonitorSmartphone size={16} className="text-gray-400" /> Session Management
                   </h3>
-                  <p className="text-xs text-gray-400">You are currently logged in on 2 devices. Review your active sessions.</p>
+                  <p className="text-xs text-gray-400">You are currently logged in on 1 device. Review your active sessions.</p>
                 </div>
-                <button className="px-4 py-2 bg-[#1E232B] hover:bg-[#30363D] border border-[#30363D] text-gray-200 text-sm font-medium rounded-lg transition-colors shrink-0">
+                <button disabled className="px-4 py-2 bg-[#1E232B] border border-[#30363D] text-gray-500 text-sm font-medium rounded-lg transition-colors shrink-0 cursor-not-allowed">
                   View Sessions
                 </button>
               </div>
 
               <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-blue-900/10">
-                <div>
+                <div className="opacity-70">
                   <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
                     <Smartphone size={16} className="text-blue-400" /> Two-Factor Authentication
                   </h3>
                   <p className="text-xs text-blue-200/70">Add an extra layer of security to your account. Highly recommended.</p>
                 </div>
-                <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shrink-0">
+                <button disabled className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg transition-colors shrink-0 opacity-50 cursor-not-allowed">
                   Enable 2FA
                 </button>
               </div>
@@ -385,38 +492,38 @@ const Settings = () => {
             </div>
             
             <div className="border border-red-500/30 bg-red-900/5 rounded-2xl overflow-hidden">
-              <div className="p-6 border-b border-red-500/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="p-6 border-b border-red-500/10 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-50">
                 <div>
                   <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
                     <UserMinus size={16} className="text-gray-400" /> Transfer Ownership
                   </h3>
                   <p className="text-xs text-gray-400">Transfer this workspace to another user or organization.</p>
                 </div>
-                <button className="px-4 py-2 bg-[#1E232B] hover:bg-[#30363D] border border-[#30363D] text-gray-200 text-sm font-medium rounded-lg transition-colors shrink-0">
+                <button disabled className="px-4 py-2 bg-[#1E232B] border border-[#30363D] text-gray-500 text-sm font-medium rounded-lg transition-colors shrink-0 cursor-not-allowed">
                   Transfer
                 </button>
               </div>
 
-              <div className="p-6 border-b border-red-500/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="p-6 border-b border-red-500/10 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-50">
                 <div>
                   <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
                     <LogOut size={16} className="text-gray-400" /> Leave Workspace
                   </h3>
                   <p className="text-xs text-gray-400">Revoke your own access to this workspace. You will need to be re-invited.</p>
                 </div>
-                <button className="px-4 py-2 bg-[#1E232B] hover:bg-red-900/30 border border-red-500/30 text-red-400 text-sm font-medium rounded-lg transition-colors shrink-0">
+                <button disabled className="px-4 py-2 bg-[#1E232B] border border-red-500/30 text-red-800 text-sm font-medium rounded-lg transition-colors shrink-0 cursor-not-allowed">
                   Leave
                 </button>
               </div>
 
-              <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-50">
                 <div>
                   <h3 className="text-sm font-bold text-white mb-1 flex items-center gap-2">
                     <Trash2 size={16} className="text-red-400" /> Delete Workspace
                   </h3>
                   <p className="text-xs text-red-300/70">Permanently delete this workspace and all of its contents. This cannot be undone.</p>
                 </div>
-                <button className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded-lg transition-colors shrink-0">
+                <button disabled className="px-4 py-2 bg-red-900/50 text-red-400 text-sm font-medium rounded-lg transition-colors shrink-0 cursor-not-allowed">
                   Delete Workspace
                 </button>
               </div>

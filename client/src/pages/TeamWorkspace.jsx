@@ -1,20 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import DashboardLayout from '../components/DashboardLayout';
 import ProjectCard from '../components/ProjectCard';
 import { GitPullRequest, Rocket, MessageSquare, Headphones, Github, Sparkles } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 
 const TeamWorkspace = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [githubLinked, setGithubLinked] = useState(false);
 
   useEffect(() => {
     api.get('/projects')
       .then(res => setProjects(res.data))
       .catch(err => console.error(err))
       .finally(() => setLoading(false));
+
+    api.get('/auth/me')
+      .then(res => setGithubLinked(!!res.data.githubId))
+      .catch(err => console.error(err));
   }, []);
 
   // Derive unique team members from all projects
@@ -38,26 +46,38 @@ const TeamWorkspace = () => {
     
     // Add some default statuses to match mockup structure without totally hardcoding fake users
     const arr = Array.from(members.values());
-    if (arr.length > 0) arr[0].activity = 'In a huddle';
-    if (arr.length > 1) arr[1].activity = 'Reviewing PRs';
+    if (arr.length > 0) arr[0].activity = 'Online';
+    if (arr.length > 1) arr[1].activity = 'Active recently';
     
     return arr;
   }, [projects, user]);
 
   // Derive activity stream from recent projects
   const activityStream = React.useMemo(() => {
-    return projects.slice(0, 3).map((p, i) => ({
-      id: p._id,
-      user: p.owner?.username || 'System',
-      action: i === 0 ? `opened pull request for` : i === 1 ? `deployed to production` : `reviewed code in`,
-      target: p.name,
-      time: i === 0 ? '10m ago' : i === 1 ? '1h ago' : '2h ago',
-      icon: i === 0 ? <GitPullRequest size={14} className="text-purple-400" /> : i === 1 ? <Rocket size={14} className="text-blue-400" /> : <MessageSquare size={14} className="text-gray-400" />,
-      bg: i === 0 ? 'bg-purple-900/30' : i === 1 ? 'bg-blue-900/30' : 'bg-gray-800'
-    }));
+    return projects.slice(0, 3).map((p, i) => {
+      const timeAgo = p.updatedAt ? formatDistanceToNow(new Date(p.updatedAt), { addSuffix: true }) : 'recently';
+      return {
+        id: p._id,
+        user: p.owner?.username || 'System',
+        action: `updated project`,
+        target: p.name,
+        time: timeAgo,
+        icon: <Rocket size={14} className="text-blue-400" />,
+        bg: 'bg-blue-900/30'
+      };
+    });
   }, [projects]);
 
-  const activeProjects = projects.slice(0, 2);
+  // Sort projects by updatedAt to show most recent as active sessions
+  const activeProjects = React.useMemo(() => {
+    return [...projects].sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)).slice(0, 2);
+  }, [projects]);
+
+  const handleJoinSession = () => {
+    if (activeProjects.length > 0) {
+      navigate(`/editor/${activeProjects[0]._id}`);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -80,15 +100,17 @@ const TeamWorkspace = () => {
               <h2 className="text-white font-bold flex items-center gap-2">
                 <Sparkles size={18} className="text-blue-400" /> Active Sessions
               </h2>
-              <button className="text-xs text-gray-400 hover:text-white transition-colors">View All →</button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {loading ? (
-                <div className="col-span-2 h-32 flex items-center justify-center text-gray-500">Loading sessions...</div>
+                <div className="col-span-2 h-32 flex flex-col items-center justify-center text-gray-500">
+                  <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+                  Loading sessions...
+                </div>
               ) : activeProjects.length > 0 ? (
                 activeProjects.map(project => (
-                  <div key={project._id} className="relative group">
+                  <div key={project._id} className="relative group cursor-pointer" onClick={() => navigate(`/editor/${project._id}`)}>
                     <ProjectCard 
                       project={project}
                       user={user}
@@ -114,44 +136,30 @@ const TeamWorkspace = () => {
               <h2 className="text-white font-bold flex items-center gap-2">
                 <RefreshCwIcon className="text-gray-400" /> Activity Stream
               </h2>
-              <div className="flex gap-2">
-                <button className="px-3 py-1 bg-[#1E232B] text-white text-xs font-medium rounded-full">All</button>
-                <button className="px-3 py-1 text-gray-400 hover:text-white text-xs font-medium rounded-full transition-colors">Commits</button>
-                <button className="px-3 py-1 text-gray-400 hover:text-white text-xs font-medium rounded-full transition-colors">PRs</button>
-              </div>
             </div>
 
             <div className="space-y-6">
-              {activityStream.map((activity, idx) => (
-                <div key={idx} className="flex gap-4">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${activity.bg}`}>
-                    {activity.icon}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-start justify-between">
-                      <p className="text-sm text-gray-300">
-                        <span className="font-semibold text-white">{activity.user}</span> {activity.action} <span className="text-blue-400 font-medium">{activity.target}</span>
-                      </p>
-                      <span className="text-xs text-gray-500 shrink-0">{activity.time}</span>
+              {loading ? (
+                <div className="text-center text-gray-500 py-8">Loading activity...</div>
+              ) : activityStream.length > 0 ? (
+                activityStream.map((activity, idx) => (
+                  <div key={idx} className="flex gap-4">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${activity.bg}`}>
+                      {activity.icon}
                     </div>
-                    {idx === 0 && (
-                      <div className="mt-2 bg-[#0A0D14] border border-[#1E232B] rounded-lg p-3">
-                        <p className="text-xs text-gray-300 mb-2">Implement new auth flow with JWT refresh tokens</p>
-                        <div className="flex gap-2">
-                          <span className="text-[10px] font-mono bg-[#1E232B] px-1.5 py-0.5 rounded text-gray-400">auth-service</span>
-                          <span className="text-[10px] font-mono bg-red-900/20 text-red-400 px-1.5 py-0.5 rounded">-12</span>
-                          <span className="text-[10px] font-mono bg-green-900/20 text-green-400 px-1.5 py-0.5 rounded">+145</span>
-                        </div>
+                    <div className="flex-1">
+                      <div className="flex items-start justify-between">
+                        <p className="text-sm text-gray-300">
+                          <span className="font-semibold text-white">{activity.user}</span> {activity.action} <span className="text-blue-400 font-medium">{activity.target}</span>
+                        </p>
+                        <span className="text-xs text-gray-500 shrink-0">{activity.time}</span>
                       </div>
-                    )}
-                    {idx === 2 && (
-                      <div className="mt-2 border-l-2 border-[#30363D] pl-3 py-1">
-                        <p className="text-xs text-gray-400 italic">"Looks solid, but we should probably memoize this component to prevent unnecessary re-renders on the dashboard."</p>
-                      </div>
-                    )}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <div className="text-center text-gray-500 py-8">No recent activity</div>
+              )}
             </div>
           </div>
 
@@ -172,7 +180,9 @@ const TeamWorkspace = () => {
             </div>
 
             <div className="space-y-4">
-              {teamMembers.map((member, idx) => (
+              {loading ? (
+                <div className="text-center text-gray-500 py-4">Loading team...</div>
+              ) : teamMembers.map((member, idx) => (
                 <div key={idx} className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="relative">
@@ -190,8 +200,11 @@ const TeamWorkspace = () => {
                       <p className="text-[11px] text-gray-500">{member.activity}</p>
                     </div>
                   </div>
-                  {idx === 0 && (
-                    <button className="flex items-center gap-1.5 px-2 py-1 bg-[#1E232B] hover:bg-[#30363D] transition-colors rounded text-[10px] font-medium text-gray-300">
+                  {idx === 0 && activeProjects.length > 0 && (
+                    <button 
+                      onClick={handleJoinSession}
+                      className="flex items-center gap-1.5 px-2 py-1 bg-[#1E232B] hover:bg-[#30363D] transition-colors rounded text-[10px] font-medium text-gray-300"
+                    >
                       <Headphones size={12} /> Join
                     </button>
                   )}
@@ -201,7 +214,7 @@ const TeamWorkspace = () => {
           </div>
 
           {/* AI Copilot Usage */}
-          <div className="bg-[#11161D] border border-[#1E232B] rounded-2xl p-6 shadow-sm">
+          <div className="bg-[#11161D] border border-[#1E232B] rounded-2xl p-6 shadow-sm opacity-60">
             <h2 className="text-white font-bold flex items-center gap-2 mb-6">
               <BotIcon className="text-purple-400" /> AI Copilot Usage
             </h2>
@@ -209,61 +222,38 @@ const TeamWorkspace = () => {
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-[#0A0D14] border border-[#1E232B] rounded-xl p-3">
                 <p className="text-[10px] text-gray-500 font-bold tracking-wider mb-1">Tokens (7d)</p>
-                <p className="text-xl font-semibold text-white mb-1">1.2M</p>
-                <p className="text-[10px] text-green-400 flex items-center gap-1">↗ +12%</p>
+                <p className="text-xl font-semibold text-white mb-1">0</p>
+                <p className="text-[10px] text-gray-500 flex items-center gap-1">-</p>
               </div>
               <div className="bg-[#0A0D14] border border-[#1E232B] rounded-xl p-3">
                 <p className="text-[10px] text-gray-500 font-bold tracking-wider mb-1">Time Saved</p>
-                <p className="text-xl font-semibold text-white mb-1">14h</p>
+                <p className="text-xl font-semibold text-white mb-1">0h</p>
                 <p className="text-[10px] text-gray-500">Est. this week</p>
               </div>
             </div>
-
-            <div>
-              <p className="text-[10px] text-gray-500 font-bold tracking-wider mb-3">Top Actions</p>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="w-2/3 h-1.5 bg-[#1E232B] rounded-full overflow-hidden">
-                    <div className="w-[80%] h-full bg-purple-500"></div>
-                  </div>
-                  <span className="text-gray-400 font-mono">Code Gen</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <div className="w-2/3 h-1.5 bg-[#1E232B] rounded-full overflow-hidden">
-                    <div className="w-[45%] h-full bg-blue-500"></div>
-                  </div>
-                  <span className="text-gray-400 font-mono">Refactoring</span>
-                </div>
-                <div className="flex items-center justify-between text-xs">
-                  <div className="w-2/3 h-1.5 bg-[#1E232B] rounded-full overflow-hidden">
-                    <div className="w-[15%] h-full bg-teal-500"></div>
-                  </div>
-                  <span className="text-gray-400 font-mono">Docs</span>
-                </div>
-              </div>
-            </div>
+            <p className="text-xs text-gray-500 text-center">AI metrics are currently unavailable.</p>
           </div>
 
           {/* GitHub Sync */}
           <div className="bg-[#11161D] border border-[#1E232B] rounded-2xl p-6 shadow-sm relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-6">
-              <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-            </div>
+            {githubLinked && (
+              <div className="absolute top-0 right-0 p-6">
+                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+              </div>
+            )}
             <h2 className="text-white font-bold flex items-center gap-2 mb-4">
               <Github className="text-gray-300" size={18} /> GitHub Sync
             </h2>
             <div className="space-y-2 text-xs">
               <div className="flex justify-between">
-                <span className="text-gray-500">Organization:</span>
-                <span className="text-gray-300 font-mono">nexus-dev</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-500">Last Sync:</span>
-                <span className="text-gray-300">Just now</span>
+                <span className="text-gray-500">Account Linked:</span>
+                <span className="text-gray-300 font-mono">{githubLinked ? 'Yes' : 'No'}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Status:</span>
-                <span className="text-teal-400">Healthy</span>
+                <span className={githubLinked ? "text-green-400" : "text-gray-500"}>
+                  {githubLinked ? 'Healthy' : 'Disconnected'}
+                </span>
               </div>
             </div>
           </div>
