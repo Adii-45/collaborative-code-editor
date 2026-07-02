@@ -1,0 +1,267 @@
+.featuresSection {
+  padding: 120px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.sectionTitle {
+  font-size: clamp(32px, 4vw, 56px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 16px;
+}
+
+.gradientText {
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.sectionSubtitle {
+  font-size: 18px;
+  color: #8b949e;
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.featureCard {
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+.featureCard:hover {
+  background: rgba(30, 41, 59, 0.8);
+  border-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.wideCard {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  gap: 40px;
+}
+
+@media (max-width: 768px) {
+  .wideCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.cardHeader {
+  flex: 1;
+}
+
+.iconWrapper {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 24px;
+  color: #3b82f6; /* Primary blue */
+}
+
+.cardTitle {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: #ffffff;
+}
+
+.cardDescription {
+  color: #8b949e;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+.cardVisual {
+  flex: 1;
+  margin-top: 32px;
+  min-height: 150px;
+  background: rgba(15, 23, 42, 0.5);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.wideCard .cardVisual {
+  margin-top: 0;
+  height: 250px;
+}
+
+/* Specific Visuals */
+
+.slowDevContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #8b949e;
+  font-size: 13px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.step {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cross {
+  color: #ff5f56;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.collabContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.collabCursor1, .collabCursor2 {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.cursorPoint {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.githubContainer {
+  display: flex;
+  align-items: center;
+  width: 80%;
+  gap: 12px;
+}
+
+.repoBox, .nexusBox {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.nexusBox {
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  border: none;
+}
+
+.progressLine {
+  height: 2px;
+  background: #3b82f6;
+  flex: 1;
+}
+
+.terminalContainer {
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.terminalHeader {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.terminalBody {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  color: #c9d1d9;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.previewVisual {
+  background: white;
+  color: black;
+  padding: 16px 32px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(255,255,255,0.1);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.blinkingDot {
+  width: 8px;
+  height: 8px;
+  background: #27c93f;
+  border-radius: 50%;
+  animation: blink 1s infinite;
+}
+
+.inviteBtn {
+  background: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  font-weight: 600;
+  border: 1px solid rgba(59, 130, 246, 0.5);
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.gitVisual {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  color: #7ee787;
+  text-align: center;
+}

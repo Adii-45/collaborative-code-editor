@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import AcceptInvite from './pages/AcceptInvite';
 import GitHubCallback from './pages/GitHubCallback';
 import CommandPalette from './components/CommandPalette';
+import Landing from './pages/Landing';
 
 function App() {
   const [isCommandOpen, setIsCommandOpen] = React.useState(false);
@@ -82,8 +83,8 @@ function App() {
             />
 
             {/* Default redirect */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Landing />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
 
