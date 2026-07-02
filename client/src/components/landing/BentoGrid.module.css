@@ -1,13 +1,25 @@
 .section {
-  padding: 160px 40px;
-  max-width: 1200px;
+  padding: 96px 32px;
+  max-width: 1280px;
   margin: 0 auto;
   position: relative;
 }
 
+.glowTop {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60%;
+  height: 200px;
+  background: radial-gradient(ellipse, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+}
+
 .header {
   text-align: center;
-  margin-bottom: 80px;
+  margin-bottom: 64px;
 }
 
 .title {
@@ -36,38 +48,43 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  auto-rows: minmax(200px, auto);
+  grid-auto-rows: 280px;
 }
 
 @media (max-width: 1024px) {
   .grid {
     grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: minmax(280px, auto);
   }
 }
 
 @media (max-width: 768px) {
   .grid {
     grid-template-columns: 1fr;
+    grid-auto-rows: minmax(240px, auto);
   }
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
   border-radius: 24px;
   padding: 32px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
 }
 
 .card:hover {
-  background: rgba(30, 41, 59, 0.4);
-  border-color: rgba(59, 130, 246, 0.3);
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 .span2 {
@@ -80,6 +97,13 @@
   }
 }
 
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
 .iconWrapper {
   width: 48px;
   height: 48px;
@@ -88,14 +112,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 24px;
   border: 1px solid rgba(59, 130, 246, 0.2);
   transition: all 0.3s ease;
+  z-index: 10;
 }
 
 .card:hover .iconWrapper {
   background: rgba(59, 130, 246, 0.2);
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 
 .icon {
@@ -106,11 +130,135 @@
   font-size: 20px;
   font-weight: 600;
   color: #f8fafc;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .cardDesc {
   color: #94a3b8;
   font-size: 15px;
   line-height: 1.6;
+}
+
+/* Illustrations */
+.illustrationContainer {
+  flex: 1;
+  height: 80px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.card:hover .illustrationContainer {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.collabIll {
+  position: relative;
+  width: 100px;
+  height: 100%;
+}
+
+.cursor {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #0f172a;
+}
+
+.gitIll {
+  width: 60px;
+  height: 60px;
+  position: relative;
+}
+
+.gitLine {
+  position: absolute;
+  left: 20px;
+  top: 10px;
+  bottom: 10px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.gitNode {
+  position: absolute;
+  left: 14px;
+  top: 25px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #3b82f6;
+  border: 2px solid #0f172a;
+}
+
+.zapIll {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glowOrb {
+  width: 30px;
+  height: 30px;
+  background: rgba(6, 182, 212, 0.3);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.6);
+}
+
+.previewIll {
+  width: 120px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.browserBar {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+}
+
+.dots {
+  width: 6px;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+}
+
+.boxIll {
+  width: 40px;
+  height: 40px;
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.lockIll {
+  width: 30px;
+  height: 40px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+}
+
+.codeIll {
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.codeLine {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
 }

@@ -1,24 +1,31 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import styles from './FeatureShowcase.module.css';
+import { Check, ChevronRight } from 'lucide-react';
 
 const SHOWCASES = [
   {
     title: 'Multiplayer Editing',
-    description: 'Code with your team in real-time. See exactly who is typing where, resolve conflicts before they happen, and brainstorm solutions inside the same file. Powered by Yjs and Liveblocks for zero latency.',
-    visual: 'Mockup 1',
+    description: 'Code with your team in real-time. See exactly who is typing where, resolve conflicts before they happen, and brainstorm solutions inside the same file.',
+    features: ['Sub-50ms latency globally', 'Conflict-free replicated data types', 'Presence indicators and live cursors'],
+    badge: 'Live',
+    badgeColor: '#10b981', // green
     reversed: false
   },
   {
     title: 'Instant GitHub Imports',
-    description: 'Paste any GitHub URL and have a fully running development environment in seconds. We automatically detect your framework, install dependencies, and start your server.',
-    visual: 'Mockup 2',
+    description: 'Paste any GitHub URL and have a fully running development environment in seconds. We automatically detect your framework and install dependencies.',
+    features: ['Automatic framework detection', 'Secure credential forwarding', 'Instant npm install and build'],
+    badge: 'Fast',
+    badgeColor: '#3b82f6', // blue
     reversed: true
   },
   {
     title: 'Isolated Docker Environments',
-    description: 'No more "it works on my machine". Every workspace runs in its own secure, isolated Docker container with root access. Customize your environment with standard Dockerfiles.',
-    visual: 'Mockup 3',
+    description: 'No more "it works on my machine". Every workspace runs in its own secure, isolated Docker container with root access.',
+    features: ['Full root terminal access', 'Custom Dockerfile support', 'Dedicated hardware isolation'],
+    badge: 'Secure',
+    badgeColor: '#8b5cf6', // purple
     reversed: false
   }
 ];
@@ -37,6 +44,19 @@ export default function FeatureShowcase() {
           >
             <h3 className={styles.title}>{showcase.title}</h3>
             <p className={styles.description}>{showcase.description}</p>
+            
+            <ul className={styles.featureList}>
+              {showcase.features.map((feat, i) => (
+                <li key={i} className={styles.featureItem}>
+                  <Check size={16} className={styles.checkIcon} />
+                  {feat}
+                </li>
+              ))}
+            </ul>
+
+            <button className={styles.ctaBtn}>
+              Learn more <ChevronRight size={14} />
+            </button>
           </motion.div>
 
           <motion.div 
@@ -63,9 +83,22 @@ export default function FeatureShowcase() {
                   <div className={styles.codeLine} style={{width: '90%'}}/>
                 </div>
               </div>
+
+              {/* Floating Badge */}
+              <motion.div 
+                className={styles.floatingBadge}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6 }}
+                style={{ borderColor: showcase.badgeColor }}
+              >
+                <div className={styles.badgeDot} style={{ background: showcase.badgeColor }} />
+                {showcase.badge}
+              </motion.div>
             </div>
             {/* Glowing backdrop */}
-            <div className={styles.glow} />
+            <div className={styles.glow} style={{ background: `radial-gradient(circle, ${showcase.badgeColor}33 0%, transparent 70%)` }} />
           </motion.div>
         </div>
       ))}

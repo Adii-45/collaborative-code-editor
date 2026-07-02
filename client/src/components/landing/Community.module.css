@@ -1,28 +1,32 @@
 .section {
-  padding: 120px 40px;
-  max-width: 1200px;
+  padding: 96px 32px;
+  max-width: 1280px;
   margin: 0 auto;
+  position: relative;
 }
 
-.container {
-  display: flex;
-  align-items: center;
-  gap: 80px;
+.glowTop {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 70%;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
 }
 
-@media (max-width: 1024px) {
-  .container {
-    flex-direction: column;
-    text-align: center;
-  }
-}
-
-.content {
-  flex: 1;
+.header {
+  text-align: center;
+  margin-bottom: 64px;
+  position: relative;
+  z-index: 10;
 }
 
 .title {
-  font-size: clamp(40px, 5vw, 56px);
+  font-size: clamp(32px, 4vw, 48px);
   font-weight: 800;
   color: #f8fafc;
   line-height: 1.1;
@@ -40,103 +44,191 @@
 .subtitle {
   font-size: 18px;
   color: #94a3b8;
-  line-height: 1.6;
-  margin-bottom: 48px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(12, 1fr);
   gap: 24px;
-}
-
-@media (max-width: 640px) {
-  .grid {
-    grid-template-columns: 1fr;
-  }
+  position: relative;
+  z-index: 10;
 }
 
 .card {
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  padding: 32px;
   display: flex;
-  gap: 16px;
-  text-align: left;
-  padding: 24px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  transition: all 0.3s ease;
+  flex-direction: column;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card:hover {
-  background: rgba(139, 92, 246, 0.05);
-  border-color: rgba(139, 92, 246, 0.2);
-  transform: translateY(-2px);
+  transform: translateY(-4px);
+  border-color: rgba(139, 92, 246, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-.iconWrapper {
-  width: 40px;
-  height: 40px;
-  background: rgba(139, 92, 246, 0.1);
-  color: #a78bfa;
-  border-radius: 10px;
+.githubCard { grid-column: span 7; }
+.discordCard { grid-column: span 5; }
+.templatesCard { grid-column: span 12; display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 32px; }
+
+@media (max-width: 1024px) {
+  .githubCard { grid-column: span 12; }
+  .discordCard { grid-column: span 12; }
+  .templatesCard { flex-direction: column; align-items: flex-start; }
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.iconTitle {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.cardTitle {
-  font-size: 16px;
+  gap: 12px;
+  font-size: 20px;
   font-weight: 600;
   color: #f8fafc;
-  margin-bottom: 4px;
 }
 
 .cardDesc {
-  font-size: 14px;
+  font-size: 15px;
   color: #94a3b8;
-  line-height: 1.5;
+  line-height: 1.6;
+  margin-bottom: 24px;
 }
 
-.visual {
-  flex: 1;
-  position: relative;
-  height: 500px;
-  width: 100%;
-  border-radius: 40px;
-  background: rgba(15, 23, 42, 0.5);
+/* GitHub Styles */
+.statsBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+}
+
+.gitActivity {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: rgba(0, 0, 0, 0.2);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  overflow: hidden;
+  border-radius: 16px;
+  padding: 24px;
 }
 
-.globeGlow {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.3) 0%, transparent 70%);
-  filter: blur(50px);
-}
-
-.floatingAvatars {
-  position: absolute;
-  inset: 0;
+.gitItem {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
 }
 
 .avatar {
-  position: absolute;
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #e2e8f0, #94a3b8);
-  border-radius: 50%;
-  border: 3px solid #0b1120;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-}
-
-.avatar:nth-child(even) {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.gitText {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.gitUser { color: #e2e8f0; font-weight: 600; }
+.gitBranch { color: #3b82f6; font-family: monospace; }
+.gitCommit { margin-top: 4px; color: #f8fafc; font-family: monospace; }
+
+/* Discord Styles */
+.onlineBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.onlineDot {
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 10px #10b981;
+}
+
+.discordMessages {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.msgBubble {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #e2e8f0;
+  max-width: 80%;
+}
+
+/* Templates Styles */
+.templateList {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+}
+
+.templateItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 16px 24px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  flex: 1;
+}
+
+.tIcon { font-size: 24px; }
+.tName { font-weight: 600; color: #f8fafc; margin-bottom: 4px; }
+.tUses { font-size: 13px; color: #94a3b8; }
+
+.communityBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px 24px;
+  border-radius: 9999px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.communityBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
 }

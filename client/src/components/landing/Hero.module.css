@@ -192,8 +192,8 @@
 }
 
 .ideShowcase {
-  width: 82vw; /* Reduced from 90vw (approx 8%) */
-  max-width: 1200px; /* Reduced from 1400px */
+  width: 82vw;
+  max-width: 1280px;
   perspective: 1000px;
   display: flex;
   justify-content: center;
