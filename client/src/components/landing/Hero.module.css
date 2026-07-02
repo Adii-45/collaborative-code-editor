@@ -129,15 +129,14 @@
   color: #94a3b8;
   line-height: 1.6;
   max-width: 600px;
-  margin-bottom: 40px;
+  margin-bottom: 56px; /* Increased from 40px */
 }
 
 .ctaGroup {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 16px;
-  margin-bottom: 40px;
+  margin-bottom: 56px; /* Increased from 40px */
 }
 
 .primaryBtn {
@@ -147,37 +146,23 @@
   background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
   color: white;
   text-decoration: none;
-  padding: 16px 32px;
+  padding: 18px 40px; /* Increased padding */
   border-radius: 9999px;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
-  transition: all 0.3s ease;
-  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .primaryBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.5);
+  transform: translateY(-2px) scale(1.03); /* Subtle scale */
+  box-shadow: 0 15px 40px rgba(59, 130, 246, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #60a5fa 0%, #22d3ee 100%);
 }
 
 .secondaryBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: white;
-  padding: 16px 32px;
-  border-radius: 9999px;
-  font-size: 16px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  cursor: pointer;
-}
-
-.secondaryBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  display: none; /* Removed from JSX, keeping CSS hide just in case */
 }
 
 .featureBadges {
@@ -185,6 +170,7 @@
   justify-content: center;
   gap: 24px;
   flex-wrap: wrap;
+  margin-bottom: 80px; /* Added massive breathing room before IDE */
 }
 
 .featureBadge {
@@ -194,10 +180,11 @@
   font-size: 14px;
   color: #cbd5e1;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.03);
-  padding: 6px 16px;
+  background: rgba(255, 255, 255, 0.02); /* Softer background */
+  padding: 8px 18px; /* Slightly more padding */
   border-radius: 9999px;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .checkIcon {
@@ -205,8 +192,8 @@
 }
 
 .ideShowcase {
-  width: 90vw;
-  max-width: 1400px;
+  width: 82vw; /* Reduced from 90vw (approx 8%) */
+  max-width: 1200px; /* Reduced from 1400px */
   perspective: 1000px;
   display: flex;
   justify-content: center;

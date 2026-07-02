@@ -1,0 +1,95 @@
+.section {
+  padding: 120px 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.marqueeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+}
+
+.marqueeContainer::before,
+.marqueeContainer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 150px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.marqueeContainer::before {
+  left: 0;
+  background: linear-gradient(to right, #0b1120, transparent);
+}
+
+.marqueeContainer::after {
+  right: 0;
+  background: linear-gradient(to left, #0b1120, transparent);
+}
+
+.marqueeRow {
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+}
+
+.marqueeTrack {
+  display: flex;
+  gap: 24px;
+  padding-left: 24px;
+  width: max-content;
+}
+
+.trackLeft {
+  animation: scrollLeft 40s linear infinite;
+}
+
+.trackRight {
+  animation: scrollRight 50s linear infinite;
+}
+
+@keyframes scrollLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-33.33% - 8px)); } /* 1/3 of the width because array is tripled */
+}
+
+@keyframes scrollRight {
+  0% { transform: translateX(calc(-33.33% - 8px)); }
+  100% { transform: translateX(0); }
+}
+
+.techPill {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 16px 32px;
+  border-radius: 9999px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e2e8f0;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.techPill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}

@@ -71,10 +71,6 @@ export default function Hero() {
               Start Building
               <ChevronRight size={18} />
             </Link>
-            <button className={styles.secondaryBtn}>
-              <Play size={18} />
-              Watch Demo
-            </button>
           </motion.div>
 
           <div className={styles.featureBadges}>

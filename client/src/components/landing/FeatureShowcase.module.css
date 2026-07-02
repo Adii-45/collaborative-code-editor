@@ -1,0 +1,125 @@
+.section {
+  padding: 120px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 160px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 80px;
+}
+
+.reversed {
+  flex-direction: row-reverse;
+}
+
+@media (max-width: 1024px) {
+  .row, .reversed {
+    flex-direction: column;
+    gap: 60px;
+    text-align: center;
+  }
+}
+
+.textContent {
+  flex: 1;
+}
+
+.title {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 800;
+  color: #f8fafc;
+  margin-bottom: 24px;
+  letter-spacing: -1px;
+}
+
+.description {
+  font-size: 18px;
+  color: #94a3b8;
+  line-height: 1.6;
+}
+
+.visualContent {
+  flex: 1;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%);
+  filter: blur(40px);
+  z-index: 0;
+}
+
+.mockupPlaceholder {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 100%;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mockupHeader {
+  height: 32px;
+  background: rgba(30, 41, 59, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.dots {
+  display: flex;
+  gap: 8px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.mockupBody {
+  flex: 1;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.simulatedCode {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.codeLine {
+  height: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+
+.codeLine:nth-child(even) {
+  background: rgba(59, 130, 246, 0.1);
+}
