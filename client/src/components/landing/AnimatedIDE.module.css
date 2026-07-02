@@ -1,0 +1,411 @@
+.ideContainer {
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ambientGlow {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, rgba(6, 182, 212, 0.1) 40%, transparent 70%);
+  filter: blur(80px);
+  z-index: 0;
+  animation: pulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+
+.ideWindow {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: 600px;
+  background: rgba(15, 23, 42, 0.85); /* Slate 900 base */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.ideHeader {
+  display: flex;
+  align-items: center;
+  height: 40px;
+  background: rgba(30, 41, 59, 0.6); /* Slate 800 */
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0 16px;
+}
+
+.windowControls {
+  display: flex;
+  gap: 8px;
+  width: 60px;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.headerTabs {
+  display: flex;
+  flex: 1;
+  gap: 2px;
+  margin-left: 16px;
+  height: 100%;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  height: 100%;
+  font-size: 12px;
+  color: #8b949e;
+  font-family: 'JetBrains Mono', monospace;
+  background: transparent;
+  border-right: 1px solid rgba(255, 255, 255, 0.02);
+  cursor: default;
+}
+
+.activeTab {
+  background: rgba(255, 255, 255, 0.05);
+  color: #e2e8f0;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.presenceAvatars {
+  display: flex;
+}
+
+.avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: bold;
+  border: 2px solid #0f172a;
+  background: rgba(30, 41, 59, 1);
+  color: white;
+}
+
+.liveBadge {
+  background: #3b82f6;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Body */
+.ideBody {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 200px;
+  background: rgba(15, 23, 42, 0.4);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarTitle {
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  padding: 12px 16px;
+  letter-spacing: 1px;
+}
+
+.fileTree {
+  display: flex;
+  flex-direction: column;
+}
+
+.treeItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  font-size: 12px;
+  color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.activeTreeItem {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+}
+
+/* Main Area */
+.mainArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.editorSplit {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Code Editor */
+.editorPanel {
+  flex: 1;
+  display: flex;
+  padding: 16px 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  position: relative;
+  overflow: hidden;
+}
+
+.lineNumbers {
+  width: 40px;
+  text-align: right;
+  padding-right: 12px;
+  color: #475569;
+  user-select: none;
+}
+
+.codeContent {
+  flex: 1;
+  position: relative;
+}
+
+.blinkingCursor {
+  display: inline-block;
+  width: 8px;
+  height: 16px;
+  background-color: #3b82f6;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+/* Syntax Highlighting */
+.keyword { color: #c678dd; } /* Purple */
+.component { color: #e5c07b; } /* Yellow */
+.string { color: #98c379; } /* Green */
+
+/* Collaborator Cursor */
+.collabCursor {
+  position: absolute;
+  pointer-events: none;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+}
+
+.cursorPoint {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.cursorLabel {
+  font-size: 9px;
+  color: white;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border-top-left-radius: 0;
+  margin-top: -2px;
+  margin-left: 8px;
+  font-family: 'Geist', sans-serif;
+  font-weight: 600;
+}
+
+/* Live Preview */
+.previewPanel {
+  width: 40%;
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+.previewHeader {
+  height: 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(30, 41, 59, 0.3);
+}
+
+.previewAddress {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.previewBody {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #ffffff; /* White background for preview */
+}
+
+.loadingSpinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.mockApp {
+  width: 100%;
+  height: 100%;
+  background: #f8fafc;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+
+.mockAppHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.mockAppLogo {
+  width: 100px;
+  height: 24px;
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.mockAppAvatars {
+  display: flex;
+  gap: -8px;
+}
+
+.mockAvatar {
+  width: 24px;
+  height: 24px;
+  background: #94a3b8;
+  border-radius: 50%;
+  border: 2px solid #f8fafc;
+  margin-left: -8px;
+}
+
+.mockAppBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mockLine {
+  height: 12px;
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+
+/* Terminal */
+.terminalPanel {
+  height: 120px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(15, 23, 42, 0.9);
+  display: flex;
+  flex-direction: column;
+}
+
+.terminalHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  letter-spacing: 1px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.terminalContent {
+  padding: 8px 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.termText { color: #94a3b8; }
+.termCommand { color: #e2e8f0; }
+.termSuccess { color: #10b981; }
+.termCursor { color: #64748b; }
+
+/* Toasts */
+.toastContainer {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.toast {
+  background: rgba(30, 41, 59, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #cbd5e1;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+}
+
+.toastDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
