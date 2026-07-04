@@ -38,10 +38,10 @@
   box-shadow: 0 4px 20px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
   padding: 6px 16px;
   border-radius: 9999px;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #f8fafc;
+  font-size: 12px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-label);
+  color: var(--text-body);
   margin-bottom: 24px;
 }
 
@@ -54,11 +54,11 @@
 }
 
 .title {
-  font-size: clamp(40px, 5vw, 64px);
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -2px;
-  line-height: 1.1;
+  font-size: var(--text-h2);
+  font-weight: var(--weight-heading);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--leading-tight);
 }
 
 .gradientText {
@@ -167,17 +167,17 @@
 .icon { color: #60a5fa; }
 
 .cardTitle {
-  font-size: 22px;
-  font-weight: 700;
-  color: #f8fafc;
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
   margin-bottom: 8px;
-  letter-spacing: -0.5px;
+  letter-spacing: var(--tracking-tight);
 }
 
 .cardDesc {
-  color: #94a3b8;
+  color: var(--text-body);
   font-size: 15px;
-  line-height: 1.5;
+  line-height: var(--leading-body);
   margin-bottom: 16px;
 }
 

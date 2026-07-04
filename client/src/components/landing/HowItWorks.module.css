@@ -12,10 +12,11 @@
 }
 
 .title {
-  font-size: clamp(32px, 4vw, 48px);
-  font-weight: 800;
-  color: #f8fafc;
-  letter-spacing: -1px;
+  font-size: var(--text-h2);
+  font-weight: var(--weight-heading);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--leading-tight);
 }
 
 .timeline {

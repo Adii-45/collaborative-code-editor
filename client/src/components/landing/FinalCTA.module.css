@@ -27,17 +27,20 @@
 }
 
 .title {
-  font-size: clamp(48px, 6vw, 72px);
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -2px;
+  font-size: var(--text-display);
+  font-weight: var(--weight-heading);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
   margin-bottom: var(--title-gap);
 }
 
 .subtitle {
   font-size: 20px;
-  color: #94a3b8;
-  margin-bottom: 48px;
+  color: var(--text-body);
+  line-height: var(--leading-body);
+  max-width: var(--measure);
+  margin: 0 auto 48px;
 }
 
 .btn {

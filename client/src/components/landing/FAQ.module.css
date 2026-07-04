@@ -10,10 +10,11 @@
 }
 
 .title {
-  font-size: clamp(32px, 4vw, 48px);
-  font-weight: 800;
-  color: #f8fafc;
-  letter-spacing: -1px;
+  font-size: var(--text-h2);
+  font-weight: var(--weight-heading);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--leading-tight);
 }
 
 .accordion {
@@ -49,8 +50,9 @@
   justify-content: space-between;
   align-items: center;
   font-size: 18px;
-  font-weight: 600;
-  color: #f8fafc;
+  font-weight: var(--weight-semibold);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text-primary);
 }
 
 .icon {
@@ -68,7 +70,7 @@
 
 .answer {
   padding: 0 24px 24px;
-  color: #94a3b8;
-  line-height: 1.6;
+  color: var(--text-body);
+  line-height: var(--leading-body);
   font-size: 15px;
 }

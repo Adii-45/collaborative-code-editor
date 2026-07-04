@@ -10,16 +10,20 @@
 }
 
 .title {
-  font-size: clamp(32px, 4vw, 48px);
-  font-weight: 800;
-  color: #f8fafc;
+  font-size: var(--text-h2);
+  font-weight: var(--weight-heading);
+  color: var(--text-primary);
   margin-bottom: var(--title-gap);
-  letter-spacing: -1px;
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--leading-tight);
 }
 
 .subtitle {
   font-size: 18px;
-  color: #94a3b8;
+  color: var(--text-body);
+  line-height: var(--leading-body);
+  max-width: var(--measure);
+  margin: 0 auto;
 }
 
 .grid {
@@ -104,8 +108,9 @@
 
 .planName {
   font-size: 20px;
-  font-weight: 600;
-  color: #f8fafc;
+  font-weight: var(--weight-semibold);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-tight);
   margin-bottom: 16px;
 }
 
@@ -118,9 +123,9 @@
 
 .price {
   font-size: 48px;
-  font-weight: 800;
-  color: #ffffff;
-  letter-spacing: -2px;
+  font-weight: var(--weight-heading);
+  color: var(--text-primary);
+  letter-spacing: var(--tracking-heading);
 }
 
 .period {

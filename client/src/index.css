@@ -36,6 +36,35 @@
   --cta-gap: var(--space-36);              /* paragraph → CTA            */
   --container-max: 1280px;                 /* standard content width     */
   --container-narrow: 800px;               /* text-dense sections        */
+
+  /* ---------- TYPOGRAPHY ---------- */
+  /* Size scale: display > section (h2) > card (h3) */
+  --text-display: clamp(44px, 6vw, 72px);  /* hero + final CTA           */
+  --text-h2: clamp(32px, 4vw, 52px);       /* all section headings       */
+  --text-h3: 22px;                         /* card titles                */
+
+  /* Weight ramp — hierarchy steps down without changing color */
+  --weight-body: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-heading: 700;
+
+  /* Tracking is em-based so it scales with the responsive font sizes */
+  --tracking-display: -0.03em;
+  --tracking-heading: -0.02em;
+  --tracking-tight: -0.01em;
+  --tracking-label: 0.08em;                /* uppercase eyebrows         */
+
+  /* Line heights */
+  --leading-tight: 1.1;                    /* headings                   */
+  --leading-body: 1.6;                     /* paragraphs                 */
+
+  /* Text-color ramp (primary → body → muted) */
+  --text-primary: #f8fafc;
+  --text-body: #94a3b8;
+  --text-muted: #64748b;
+
+  --measure: 36rem;                        /* comfortable reading width  */
 }
 
 @layer base {

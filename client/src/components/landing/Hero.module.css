@@ -81,12 +81,12 @@
 }
 
 .headline {
-  font-size: clamp(48px, 6vw, 72px);
-  line-height: 1.1;
-  font-weight: 800;
-  letter-spacing: -2px;
+  font-size: var(--text-display);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-heading);
+  letter-spacing: var(--tracking-display);
   margin-bottom: 8px;
-  color: #f8fafc;
+  color: var(--text-primary);
 }
 
 .typewriterContainer {
@@ -98,10 +98,10 @@
 }
 
 .typewriterText {
-  font-size: clamp(48px, 6vw, 72px);
-  line-height: 1.1;
-  font-weight: 800;
-  letter-spacing: -2px;
+  font-size: var(--text-display);
+  line-height: var(--leading-tight);
+  font-weight: var(--weight-heading);
+  letter-spacing: var(--tracking-display);
   margin: 0;
 }
 
@@ -126,9 +126,9 @@
 
 .description {
   font-size: clamp(16px, 2vw, 20px);
-  color: #94a3b8;
-  line-height: 1.6;
-  max-width: 600px;
+  color: var(--text-body);
+  line-height: var(--leading-body);
+  max-width: var(--measure);
   margin-bottom: 56px; /* Increased from 40px */
 }
 
