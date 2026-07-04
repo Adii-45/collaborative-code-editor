@@ -1,6 +1,6 @@
 .section {
-  padding: 96px 32px;
-  max-width: 1280px;
+  padding: var(--section-py) var(--section-px);
+  max-width: var(--container-max);
   margin: 0 auto;
   position: relative;
 }
@@ -23,7 +23,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin-bottom: 80px;
+  margin-bottom: var(--section-header-gap);
   position: relative;
   z-index: 10;
 }
@@ -72,7 +72,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 24px;
+  gap: var(--grid-gap);
   grid-auto-rows: 280px;
   position: relative;
   z-index: 10;
@@ -103,7 +103,7 @@
 .collabCard .cardHeader { max-width: 45%; padding-bottom: 32px; justify-content: center; }
 .collabCard .illustrationArea { padding: 32px 0 0 32px; flex: 1; align-items: flex-end; justify-content: flex-end; position: relative; }
 .collabCard .illustrationArea::before { content: ''; position: absolute; top: 20%; left: 20%; width: 60%; height: 60%; background: #3b82f6; filter: blur(100px); opacity: 0.15; pointer-events: none; }
-.collabMockWindow { width: 120%; height: 110%; margin-bottom: -20px; margin-right: -20px; border-radius: 16px 0 0 0; font-size: 1.1em; }
+.collabMockWindow { width: 120%; height: 110%; margin-bottom: -20px; margin-right: -20px; border-radius: 12px 0 0 0; }
 .runtimeCard { grid-column: span 2; grid-row: span 1; }
 .dockerCard { grid-column: span 2; grid-row: span 1; }
 .ideCard { grid-column: span 6; grid-row: span 2; display: flex; flex-direction: column; }
@@ -359,7 +359,7 @@
 
 /* LIVE PREVIEW BROWSER */
 .previewCard .illustrationArea { padding-right: 0; padding-left: 32px; }
-.previewCard .mockWindow { margin-bottom: -10px; margin-right: -10px; border-radius: 10px 0 0 0; }
+.previewCard .mockWindow { margin-bottom: -10px; margin-right: -10px; border-radius: 12px 0 0 0; }
 .browserTabs { display: flex; align-items: flex-end; padding-left: 16px; gap: 4px; height: 100%; flex: 1; }
 .browserTabActive { background: #0b1120; height: 28px; border-radius: 8px 8px 0 0; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 11px; color: #f8fafc; border-top: 1px solid #3b82f6; }
 .browserTab { height: 28px; padding: 0 16px; display: flex; align-items: center; gap: 8px; font-size: 11px; color: #64748b; }

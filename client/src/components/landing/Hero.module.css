@@ -4,7 +4,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 120px 20px 80px; /* offset for header */
+  padding: var(--section-py) var(--section-px) var(--space-80); /* offset for header */
   overflow: hidden;
   width: 100%;
 }
