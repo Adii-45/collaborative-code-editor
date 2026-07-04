@@ -88,7 +88,7 @@
   border-radius: 28px;
   display: flex;
   flex-direction: column;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s ease-out;
   position: relative;
   overflow: hidden;
 }
@@ -210,7 +210,7 @@
   align-items: flex-end;
   justify-content: flex-end;
   opacity: 0.9;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s ease-out;
   padding-right: 32px; /* Push in from right */
   padding-bottom: 0;
   overflow: hidden;
@@ -226,7 +226,7 @@
   align-items: stretch;
   justify-content: center;
   opacity: 0.9;
-  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.25s ease-out;
   padding: 0 32px 32px 32px;
 }
 
@@ -291,8 +291,8 @@
 .mockAvatars { position: absolute; top: 12px; right: 16px; display: flex; z-index: 10; }
 .avatar { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #0b1120; color: white; font-size: 9px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
 
-.cursorTyping { position: absolute; animation: typingAnim 4s ease-in-out infinite alternate; pointer-events: none; z-index: 10; display: flex; }
-.cursorFloating { position: absolute; animation: floatAnim 6s ease-in-out infinite alternate; pointer-events: none; z-index: 10; display: flex; }
+.cursorTyping { position: absolute; pointer-events: none; z-index: 10; display: flex; }
+.cursorFloating { position: absolute; pointer-events: none; z-index: 10; display: flex; }
 .caret { width: 2px; height: 16px; }
 .cursorLabel { position: absolute; top: 16px; left: 0; padding: 2px 6px; border-radius: 0 4px 4px 4px; color: white; font-size: 9px; font-weight: 600; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 
@@ -301,19 +301,15 @@
 .commentHeader { font-size: 9px; color: #94a3b8; display: flex; align-items: center; gap: 4px; font-weight: 600; }
 .commentBody { font-size: 11px; color: #f8fafc; }
 
-@keyframes floatAnim { 0% { transform: translate(0, 0); } 100% { transform: translate(60px, -20px); } }
-@keyframes typingAnim { 0% { transform: translate(0, 0); } 100% { transform: translate(40px, 0); } }
 
 /* TERMINAL BLOCKS (Unified) */
 .termBlock { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
 .termPrompt { display: flex; gap: 8px; color: #e2e8f0; }
 .termCmd { color: #f8fafc; font-weight: 600; }
-.termLogFade { color: #64748b; animation: fadeLog 4s infinite; }
+.termLogFade { color: #64748b; }
 .termLogSuccess { color: #10b981; }
 .termLogInfo { color: #3b82f6; }
-.blink { animation: blinkAnim 1s infinite; }
-@keyframes fadeLog { 0%, 50% { opacity: 1; display: block; } 51%, 100% { opacity: 0; display: none; } }
-@keyframes blinkAnim { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+.blink { opacity: 0.85; }
 
 /* 2. WARP TERMINAL */
 .runtimeCard .illustrationArea { justify-content: flex-end; padding-right: 0; padding-left: 32px; }
@@ -330,8 +326,7 @@
 .statusDot { width: 6px; height: 6px; background: #10b981; border-radius: 50%; box-shadow: 0 0 6px #10b981; }
 .spinner { width: 10px; height: 10px; border: 2px solid rgba(234, 179, 8, 0.3); border-top-color: #eab308; border-radius: 50%; animation: spin 1s linear infinite; }
 .tableMetric { font-size: 11px; color: #94a3b8; }
-.tableMetricPulse { font-size: 11px; color: #94a3b8; animation: metricPulse 3s infinite alternate; }
-@keyframes metricPulse { 0% { opacity: 1; } 100% { opacity: 0.6; } }
+.tableMetricPulse { font-size: 11px; color: #94a3b8; }
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
 /* FULL IDE OVERRIDES */
@@ -354,7 +349,7 @@
 .repoText { display: flex; flex-direction: column; gap: 4px; }
 .repoName { font-size: 12px; font-weight: 500; font-family: 'Inter', sans-serif; }
 .repoMeta { font-size: 10px; color: #64748b; }
-.repoBtn { background: #f8fafc; color: #0f172a; font-size: 11px; font-weight: 600; padding: 6px 16px; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
+.repoBtn { background: #f8fafc; color: #0f172a; font-size: 11px; font-weight: 600; padding: 6px 16px; border-radius: 6px; cursor: pointer; transition: opacity 0.2s ease-out; }
 .repoBtn:hover { opacity: 0.9; }
 
 /* LIVE PREVIEW BROWSER */
@@ -371,8 +366,7 @@
 .renderedSidebar { width: 25%; border-right: 1px solid rgba(255,255,255,0.05); background: #111827; }
 .renderedMain { flex: 1; display: flex; flex-direction: column; }
 .renderedHeader { height: 40px; border-bottom: 1px solid rgba(255,255,255,0.05); background: #111827; }
-.renderedContentPulse { flex: 1; margin: 16px; background: rgba(59,130,246,0.1); border-radius: 8px; border: 1px dashed rgba(59,130,246,0.3); animation: appPulse 3s infinite alternate; }
-@keyframes appPulse { 0% { background: rgba(59,130,246,0.05); } 100% { background: rgba(59,130,246,0.15); } }
+.renderedContentPulse { flex: 1; margin: 16px; background: rgba(59,130,246,0.1); border-radius: 8px; border: 1px dashed rgba(59,130,246,0.3); }
 
 /* SECURE SESSIONS (Unified Network Flow) */
 .secureCard .illustrationArea { display: none; }
@@ -384,11 +378,13 @@
 .monitorFlow { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; position: relative; }
 .monitorMetric { font-size: 10px; color: #10b981; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
 .monitorPipe { width: 100%; height: 6px; background: rgba(16, 185, 129, 0.1); border-radius: 3px; position: relative; overflow: hidden; border: 1px solid rgba(16, 185, 129, 0.2); }
-.monitorPacket { position: absolute; width: 30px; height: 100%; background: #10b981; border-radius: 3px; box-shadow: 0 0 10px #10b981; animation: shoot 2s infinite; }
+.monitorPacket { position: absolute; width: 24px; height: 100%; background: #10b981; border-radius: 3px; box-shadow: 0 0 10px #10b981; opacity: 0.85; }
+.monitorPacket:nth-child(1) { left: 8%; }
+.monitorPacket:nth-child(2) { left: 42%; }
+.monitorPacket:nth-child(3) { left: 74%; }
 .monitorTags { display: flex; gap: 8px; }
 .monitorTag { font-size: 9px; padding: 2px 6px; background: rgba(255,255,255,0.05); border-radius: 4px; color: #94a3b8; border: 1px solid rgba(255,255,255,0.1); }
 .monitorTagOk { font-size: 9px; padding: 2px 6px; background: rgba(16,185,129,0.1); border-radius: 4px; color: #10b981; border: 1px solid rgba(16,185,129,0.2); font-weight: 600; }
-@keyframes shoot { 0% { left: -30px; } 100% { left: 100%; } }
 
 @media (max-width: 1024px) {
   .secureContent { flex-direction: column; text-align: left; align-items: flex-start; gap: 32px; }

@@ -69,7 +69,7 @@
   color: #8b949e;
   text-decoration: none;
   font-size: 14px;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease-out;
 }
 
 .linkColumn a:hover {
@@ -98,7 +98,7 @@
 .legalLinks a {
   color: #8b949e;
   text-decoration: none;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease-out;
 }
 
 .legalLinks a:hover {

@@ -26,10 +26,6 @@ export default function Hero() {
       <div className={styles.backgroundEffects}>
         <div className={styles.gridOverlay}></div>
         <div className={styles.auroraGradient}></div>
-        {/* Floating particles */}
-        <div className={styles.particle} style={{ top: '20%', left: '15%' }}></div>
-        <div className={styles.particle} style={{ top: '60%', right: '20%' }}></div>
-        <div className={styles.particle} style={{ top: '80%', left: '30%' }}></div>
       </div>
 
       <div className={styles.contentContainer}>
