@@ -16,11 +16,11 @@ export default function App() {
     </div>
   );
 }`,
-  collab: `import { RoomProvider, useOthers } from "@liveblocks/react";
+  collab: `import { RoomProvider, usePresence } from "./realtime";
 import { CollaborativeEditor } from "./Editor";
 
 export default function App() {
-  const others = useOthers();
+  const others = usePresence();
   
   return (
     <RoomProvider id="novus-room-1">

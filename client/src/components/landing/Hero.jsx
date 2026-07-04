@@ -57,8 +57,8 @@ export default function Hero() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            Code together in real-time, instantly import repositories, and preview applications 
-            without ever leaving your browser. The ultimate developer experience is here.
+            Code together in real time, import any GitHub repository, and run and preview
+            your app — all in the browser. No setup, no installs, just a URL.
           </motion.p>
 
           <motion.div 

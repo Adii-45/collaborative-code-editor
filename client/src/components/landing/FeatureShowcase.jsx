@@ -6,8 +6,8 @@ import { Check, ChevronRight } from 'lucide-react';
 const SHOWCASES = [
   {
     title: 'Multiplayer Editing',
-    description: 'Code with your team in real-time. See exactly who is typing where, resolve conflicts before they happen, and brainstorm solutions inside the same file.',
-    features: ['Sub-50ms latency globally', 'Conflict-free replicated data types', 'Presence indicators and live cursors'],
+    description: 'Code with your team in real time. See exactly who is typing where, follow live cursors, and brainstorm solutions inside the same file.',
+    features: ['Real-time sync over WebSockets', 'Live cursors and presence', 'See who is editing, as it happens'],
     badge: 'Live',
     badgeColor: '#10b981', // green
     reversed: false
@@ -21,9 +21,9 @@ const SHOWCASES = [
     reversed: true
   },
   {
-    title: 'Isolated Docker Environments',
-    description: 'No more "it works on my machine". Every workspace runs in its own secure, isolated Docker container with root access.',
-    features: ['Full root terminal access', 'Custom Dockerfile support', 'Dedicated hardware isolation'],
+    title: 'Isolated Workspaces',
+    description: 'No more "it works on my machine". Every project runs in its own isolated workspace, with dedicated Docker containers on the roadmap for stronger sandboxing.',
+    features: ['Isolated per-project workspace', 'Your own terminal, per project', 'Docker container support (roadmap)'],
     badge: 'Secure',
     badgeColor: '#8b5cf6', // purple
     reversed: false

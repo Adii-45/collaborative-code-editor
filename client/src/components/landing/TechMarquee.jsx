@@ -2,18 +2,18 @@ import React from 'react';
 import styles from './TechMarquee.module.css';
 
 const TECH_ROW_1 = [
-  'React', 'Next.js', 'TypeScript', 'Node.js', 'Express', 'MongoDB', 'Socket.IO'
+  'React', 'Node.js', 'Express', 'MongoDB', 'Socket.IO', 'Monaco', 'Vite', 'Tailwind CSS'
 ];
 
 const TECH_ROW_2 = [
-  'Yjs', 'Docker', 'Redis', 'Python', 'FastAPI', 'Go', 'Rust', 'Java', 'TailwindCSS', 'Liveblocks'
+  'JavaScript', 'TypeScript', 'xterm.js', 'Git', 'JWT', 'Vite', 'Framer Motion'
 ];
 
 export default function TechMarquee() {
   return (
     <section className={styles.section}>
       <div className={styles.header}>
-        <h2 className={styles.title}>Powered by Modern Technology</h2>
+        <h2 className={styles.title}>Built with Open, Modern Technology</h2>
       </div>
 
       <div className={styles.marqueeContainer}>

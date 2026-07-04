@@ -6,19 +6,19 @@ import { ChevronDown } from 'lucide-react';
 const FAQS = [
   {
     q: 'How does the collaborative editing work?',
-    a: 'NovusIDE uses Conflict-free Replicated Data Types (CRDTs) powered by Yjs and Liveblocks. This ensures that multiple developers can edit the same file simultaneously without merge conflicts, with sub-50ms latency globally.'
+    a: 'NovusIDE keeps your workspace in sync in real time over WebSockets (Socket.IO). Edits, cursor moves, and file changes are broadcast to everyone in the room as they happen, so you can see teammates’ live cursors and presence while you code together.'
   },
   {
     q: 'Can I import private GitHub repositories?',
-    a: 'Yes. By connecting your GitHub account, NovusIDE can instantly clone, install dependencies, and run both public and private repositories securely within isolated Docker containers.'
+    a: 'Yes. Connect your GitHub account and NovusIDE clones the repository with Git, installs its dependencies, and gets it running — for both public and private repos. Each project runs in its own isolated workspace.'
   },
   {
     q: 'How are my projects isolated?',
-    a: 'Every workspace runs in its own dedicated Docker container. We use Firecracker microVMs to provide strong hardware-level isolation, ensuring your code and environment variables remain completely secure.'
+    a: 'Every project runs in its own isolated workspace with a scoped filesystem and sandboxed command execution. Dedicated Docker containers are on our near-term roadmap for even stronger isolation.'
   },
   {
     q: 'What languages and frameworks are supported?',
-    a: 'We support all major languages including JavaScript, TypeScript, Python, Go, Rust, and Java. If it can run in a Docker container, it can run on NovusIDE.'
+    a: 'NovusIDE runs JavaScript and TypeScript projects on Node.js today, with broader language support expanding over time. If it runs on Node, it runs on NovusIDE.'
   }
 ];
 

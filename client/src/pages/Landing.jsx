@@ -6,7 +6,6 @@ import HowItWorks from '../components/landing/HowItWorks';
 import FeatureShowcase from '../components/landing/FeatureShowcase';
 import DevExperience from '../components/landing/DevExperience';
 import TechMarquee from '../components/landing/TechMarquee';
-import Community from '../components/landing/Community';
 import Pricing from '../components/landing/Pricing';
 import FAQ from '../components/landing/FAQ';
 import FinalCTA from '../components/landing/FinalCTA';
@@ -50,7 +49,6 @@ export default function Landing() {
         <HowItWorks />
         <FeatureShowcase />
         <DevExperience />
-        <Community />
         <Pricing />
         <FAQ />
         <FinalCTA />

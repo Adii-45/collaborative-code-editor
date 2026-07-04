@@ -1,80 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useInView } from 'framer-motion';
+import React from 'react';
+import { motion } from 'framer-motion';
 import styles from './DevExperience.module.css';
-import { LayoutGrid, Zap, Box, FolderDot, Users, Activity } from 'lucide-react';
+import { Code2, Users, Zap, Play, Github, Server } from 'lucide-react';
 
-const STATS = [
-  { label: 'Workspaces Created', target: 145000, suffix: '+', icon: LayoutGrid, sub: 'Containers spawned' },
-  { label: 'Latency', target: 12, suffix: 'ms', icon: Zap, sub: 'Global average' },
-  { label: 'Docker Runtime', target: 1.2, suffix: 's', isFloat: true, icon: Box, sub: 'Cold start time' },
-  { label: 'Projects', target: 850000, suffix: '+', icon: FolderDot, sub: 'Active repositories' },
-  { label: 'Collaborators', target: 450000, suffix: '+', icon: Users, sub: 'Daily active users' },
-  { label: 'Uptime', target: 99.99, suffix: '%', isFloat: true, icon: Activity, sub: 'Enterprise SLA' }
+const CAPABILITIES = [
+  { value: 'Monaco', label: 'VS Code Editor', sub: 'The same engine that powers VS Code', icon: Code2 },
+  { value: 'Socket.IO', label: 'Real-Time Sync', sub: 'Live cursors, presence & instant updates', icon: Users },
+  { value: 'In-Browser', label: 'Zero Install', sub: 'Runs entirely in your browser', icon: Zap },
+  { value: '1-Click', label: 'Instant Run', sub: 'Install dependencies and run in a click', icon: Play },
+  { value: 'GitHub', label: 'Repo Import', sub: 'Clone any repository straight from Git', icon: Github },
+  { value: 'Self-Host', label: 'Open Source', sub: 'Run NovusIDE on your own infrastructure', icon: Server }
 ];
-
-const AnimatedCounter = ({ target, suffix, isFloat }) => {
-  const [count, setCount] = useState(0);
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-
-  useEffect(() => {
-    if (isInView) {
-      let start = 0;
-      const duration = 2000;
-      const startTime = performance.now();
-
-      const updateCounter = (currentTime) => {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        
-        const easeOut = 1 - Math.pow(1 - progress, 4);
-        const currentCount = easeOut * target;
-        
-        setCount(isFloat ? currentCount.toFixed(2) : Math.floor(currentCount));
-
-        if (progress < 1) {
-          requestAnimationFrame(updateCounter);
-        }
-      };
-
-      requestAnimationFrame(updateCounter);
-    }
-  }, [isInView, target, isFloat]);
-
-  return (
-    <div ref={ref} className={styles.statValue}>
-      {isFloat ? count : Number(count).toLocaleString()}{suffix}
-    </div>
-  );
-};
 
 export default function DevExperience() {
   return (
     <section className={styles.section}>
       <div className={styles.header}>
-        <motion.h2 
+        <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className={styles.title}
         >
-          Scale Your <span className={styles.gradientText}>Developer Experience</span>
+          Built on a <span className={styles.gradientText}>Real Developer Stack</span>
         </motion.h2>
-        <motion.p 
+        <motion.p
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1 }}
           className={styles.subtitle}
         >
-          Built for scale from day one. NovusIDE handles the heavy lifting so your team can focus on shipping.
+          No black boxes. NovusIDE is built on open, familiar tools — the same editor as VS Code, real-time sync over WebSockets, and Git-native imports.
         </motion.p>
       </div>
 
       <div className={styles.grid}>
-        {STATS.map((stat, i) => (
-          <motion.div 
-            key={i} 
+        {CAPABILITIES.map((cap, i) => (
+          <motion.div
+            key={i}
             className={styles.statCard}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -82,12 +46,12 @@ export default function DevExperience() {
             transition={{ delay: i * 0.1 }}
           >
             <div className={styles.iconWrapper}>
-              <stat.icon size={20} className={styles.icon} />
+              <cap.icon size={20} className={styles.icon} />
             </div>
             <div className={styles.statContent}>
-              <AnimatedCounter target={stat.target} suffix={stat.suffix} isFloat={stat.isFloat} />
-              <div className={styles.statLabel}>{stat.label}</div>
-              <div className={styles.statSub}>{stat.sub}</div>
+              <div className={styles.statValue}>{cap.value}</div>
+              <div className={styles.statLabel}>{cap.label}</div>
+              <div className={styles.statSub}>{cap.sub}</div>
             </div>
           </motion.div>
         ))}

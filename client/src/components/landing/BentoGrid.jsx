@@ -62,7 +62,7 @@ export default function BentoGrid() {
             <div className={styles.iconWrapper}><Users size={20} className={styles.icon} /></div>
             <h3 className={styles.cardTitle}>Real-time Collaboration</h3>
             <p className={styles.cardDesc}>Code with your team in real-time, exactly like Google Docs.</p>
-            <div className={styles.techStack}><TechPill>Liveblocks</TechPill><TechPill>Yjs</TechPill></div>
+            <div className={styles.techStack}><TechPill>Socket.IO</TechPill><TechPill>WebSockets</TechPill></div>
           </div>
           <div className={styles.illustrationArea}>
             <div className={`${styles.mockWindow} ${styles.collabMockWindow}`}>
@@ -188,7 +188,7 @@ export default function BentoGrid() {
               <h3 className={styles.cardTitle}>Browser IDE</h3>
               <p className={styles.cardDesc}>A complete, VS Code-compatible development environment.</p>
             </div>
-            <div className={styles.techStack} style={{marginLeft: 'auto'}}><TechPill>Monaco</TechPill><TechPill>WebContainer</TechPill></div>
+            <div className={styles.techStack} style={{marginLeft: 'auto'}}><TechPill>Monaco</TechPill><TechPill>xterm</TechPill></div>
           </div>
           <div className={styles.illustrationAreaFull}>
             <div className={styles.mockWindow} style={{ width: '95%', height: '90%' }}>
@@ -293,7 +293,7 @@ export default function BentoGrid() {
                   <div className={styles.repoLeft}>
                     <Github size={16}/>
                     <div className={styles.repoText}>
-                      <div className={styles.repoName}>Adii-45 / collaborative-code-editor</div>
+                      <div className={styles.repoName}>novuside / starter-app</div>
                       <div className={styles.repoMeta}>Updated 2m ago</div>
                     </div>
                   </div>
@@ -359,7 +359,7 @@ export default function BentoGrid() {
             <div className={styles.secureText}>
               <div className={styles.iconWrapper}><ShieldCheck size={20} className={styles.icon} /></div>
               <h3 className={styles.cardTitle}>Secure Sessions</h3>
-              <p className={styles.cardDesc}>End-to-end encrypted WebSocket connections.</p>
+              <p className={styles.cardDesc}>Encrypted WebSocket connections over WSS / TLS.</p>
               <div className={styles.techStack}><TechPill>TLS</TechPill><TechPill>JWT</TechPill></div>
             </div>
             
@@ -367,7 +367,7 @@ export default function BentoGrid() {
               <div className={styles.monitorNode}><Activity size={16}/> Browser</div>
               
               <div className={styles.monitorFlow}>
-                <div className={styles.monitorMetric}>12ms Latency</div>
+                <div className={styles.monitorMetric}>Encrypted</div>
                 <div className={styles.monitorPipe}>
                   <div className={styles.monitorPacket} />
                   <div className={styles.monitorPacket} style={{animationDelay: '0.4s'}} />

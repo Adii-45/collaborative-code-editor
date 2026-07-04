@@ -15,7 +15,7 @@ export default function FinalCTA() {
         transition={{ duration: 0.8 }}
       >
         <h2 className={styles.title}>Ready to build your next product?</h2>
-        <p className={styles.subtitle}>Join thousands of developers building on NovusIDE today.</p>
+        <p className={styles.subtitle}>Open source and free to start. Spin up your first workspace in seconds.</p>
         <Link to="/signup" className={styles.btn}>
           Start Coding
         </Link>
