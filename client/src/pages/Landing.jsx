@@ -2,10 +2,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import Hero from '../components/landing/Hero';
 import BentoGrid from '../components/landing/BentoGrid';
-import HowItWorks from '../components/landing/HowItWorks';
 import FeatureShowcase from '../components/landing/FeatureShowcase';
-import DevExperience from '../components/landing/DevExperience';
-import TechMarquee from '../components/landing/TechMarquee';
+import HowItWorks from '../components/landing/HowItWorks';
 import Pricing from '../components/landing/Pricing';
 import FAQ from '../components/landing/FAQ';
 import FinalCTA from '../components/landing/FinalCTA';
@@ -44,11 +42,9 @@ export default function Landing() {
 
       <main className={styles.mainContent}>
         <Hero />
-        <TechMarquee />
         <BentoGrid />
-        <HowItWorks />
         <FeatureShowcase />
-        <DevExperience />
+        <HowItWorks />
         <Pricing />
         <FAQ />
         <FinalCTA />

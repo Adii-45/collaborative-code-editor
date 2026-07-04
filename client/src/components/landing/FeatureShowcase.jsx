@@ -13,20 +13,12 @@ const SHOWCASES = [
     reversed: false
   },
   {
-    title: 'Instant GitHub Imports',
-    description: 'Paste any GitHub URL and have a fully running development environment in seconds. We automatically detect your framework and install dependencies.',
-    features: ['Automatic framework detection', 'Secure credential forwarding', 'Instant npm install and build'],
-    badge: 'Fast',
-    badgeColor: '#3b82f6', // blue
-    reversed: true
-  },
-  {
     title: 'Isolated Workspaces',
     description: 'No more "it works on my machine". Every project runs in its own isolated workspace, with dedicated Docker containers on the roadmap for stronger sandboxing.',
     features: ['Isolated per-project workspace', 'Your own terminal, per project', 'Docker container support (roadmap)'],
     badge: 'Secure',
     badgeColor: '#8b5cf6', // purple
-    reversed: false
+    reversed: true
   }
 ];
 

@@ -1,15 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import styles from './HowItWorks.module.css';
-import { DownloadCloud, Box, UserPlus, Users, Play, Rocket } from 'lucide-react';
+import { DownloadCloud, Box, UserPlus, Users, Play } from 'lucide-react';
 
 const STEPS = [
   { icon: DownloadCloud, title: 'Import Repository', delay: 0 },
   { icon: Box, title: 'Workspace Created', delay: 0.2 },
   { icon: UserPlus, title: 'Invite Team', delay: 0.4 },
   { icon: Users, title: 'Collaborate', delay: 0.6 },
-  { icon: Play, title: 'Run Project', delay: 0.8 },
-  { icon: Rocket, title: 'Deploy', delay: 1.0 }
+  { icon: Play, title: 'Run Project', delay: 0.8 }
 ];
 
 export default function HowItWorks() {
